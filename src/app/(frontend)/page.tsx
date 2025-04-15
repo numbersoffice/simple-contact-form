@@ -7,7 +7,7 @@ import Link from 'next/link'
 
 export default async function HomePage() {
   return (
-    <div className="min-h-screen">
+    <div>
       <nav className="absolute left-1/2 -translate-x-1/2 w-full flex space-x-2 px-6 items-center py-6 pb-0 max-w-[1200px] mx-auto">
         <Inbox width={28} height={28} />
         <div className="text-2xl font-semibold">SCF</div>
