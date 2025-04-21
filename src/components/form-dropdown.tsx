@@ -48,7 +48,7 @@ export default function FormDropdown({ teamId, formId }: { teamId: string; formI
               <EllipsisVertical />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="mr-4">
+          <DropdownMenuContent align="end">
             <DropdownMenuLabel>Form actions</DropdownMenuLabel>
             <DropdownMenuItem onClick={() => setRenameDialogOpen(true)}>
               <Pencil />

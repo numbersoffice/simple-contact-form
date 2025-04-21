@@ -83,31 +83,64 @@ export const Teams: CollectionConfig = {
     ],
   },
   endpoints: [
-    // Initialize the payload invitation flow
+    // Remove a team member
     {
       path: '/:id/members/:memberId',
       method: 'delete',
       handler: async (req: PayloadRequest) => {
+        // Check if user is authenticated
+        if (!req.user) {
+          return Response.json({ message: 'Unauthorized' }, { status: 401 })
+        }
+
+        // Get query params
+        // Make sure they exist
         const teamId = req.routeParams?.id as string | undefined
         const memberId = req.routeParams?.memberId as string | undefined
 
-        // Make sure ids exist
         if (!teamId || !memberId) {
           return Response.json({ message: 'Team or member ID not provided' }, { status: 404 })
         }
 
-        // Get team
+        // Get team data
+        // Check if team exists
         const teamRes = await req.payload.findByID({
           collection: 'teams',
           id: teamId,
         })
 
-        // Check if team exists
-        // Note: Owner check is already handled by the access control
         if (!teamRes) {
           return Response.json({ message: 'Team not found' }, { status: 404 })
         }
 
+        // Check if user is member or owner
+        const user = req.user
+        const isMember = teamRes.members?.some((member) => {
+          if (typeof member !== 'object') return false
+          return member.id === user.id
+        })
+        const isOwner = teamRes.owners?.some((owner) => {
+          if (typeof owner !== 'object') return false
+          return owner.id === user.id
+        })
+
+        // Check user permission to remove member
+        // User is not part of the team
+        if (!isMember && !isOwner) {
+          return Response.json({ message: 'Unauthorized' }, { status: 401 })
+        }
+
+        // User is last owner
+        if (isOwner && teamRes.owners?.length === 1) {
+          return Response.json({ message: 'You cannot remove the last owner' }, { status: 401 })
+        }
+
+        // User is member and not trying to remove themselves
+        if (isMember && user.id !== memberId) {
+          return Response.json({ message: 'Unauthorized' }, { status: 401 })
+        }
+
+        // User is allowed to remove member
         // Construct new data with filtered members and owners
         const data = {
           ...teamRes,
@@ -128,7 +161,7 @@ export const Teams: CollectionConfig = {
           data,
         })
 
-        // Check if team was updated
+        // Check for update success
         if (!teamUpdateRes) {
           return Response.json({ message: 'Team not found' }, { status: 404 })
         }

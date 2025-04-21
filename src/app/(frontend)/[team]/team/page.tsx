@@ -5,6 +5,8 @@ import payload from '@/lib/payload'
 import { getUser } from '@/lib/utils-server'
 import { notFound, redirect } from 'next/navigation'
 import { AppUser, Invite } from '@/payload-types'
+import LeaveTeam from './leave-team'
+import DeleteTeam from './delete-team'
 
 export default async function MembersPage({ params }: { params: { team: string } }) {
   const awaitedParams = await params
@@ -81,14 +83,16 @@ export default async function MembersPage({ params }: { params: { team: string }
 
   const data = [...owners, ...members, ...invitees]
 
-  const role = data.filter((el) => el.id === user.id)[0].role
+  const role = data.filter((el) => el.id === user.id)[0].role as 'Owner' | 'Member'
 
   return (
     <>
-      <HeaderPage title="Members" />
-      <div className="p-4 lg:px-6">
+      <HeaderPage title="Team" />
+      <div className="p-4 lg:px-6 flex flex-col gap-4">
         <TableHeaderMembers teamName={teamRes.name} userRole={role} />
         <TableGridMembers teamId={awaitedParams.team} data={data} userRole={role} />
+        <LeaveTeam teamId={awaitedParams.team} userRole={role} teamName={teamRes.name} />
+        <DeleteTeam teamId={awaitedParams.team} userRole={role} teamName={teamRes.name} />
       </div>
     </>
   )

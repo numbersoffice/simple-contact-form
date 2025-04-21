@@ -178,9 +178,11 @@ export const Invites: CollectionConfig = {
         // Create member or owner document
         const data = { owners: team.owners, members: team.members }
         if (role === 'owner') {
-          data.owners?.push(user)
+          if (data.owners) data.owners?.push(user)
+          else data.owners = [user]
         } else {
-          data.members?.push(user)
+          if (data.members) data.members?.push(user)
+          else data.members = [user]
         }
 
         // Create team member

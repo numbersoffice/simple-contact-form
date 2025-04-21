@@ -93,29 +93,49 @@ export default function PaymentForm({
 
     // Retrieve card info from Stripe Elements
     const cardElement = elements.getElement(CardElement)
-    if (!cardElement) {
+    if (!cardElement && !hasPaymentMethod) {
       toast.error('There has been an issue with your payment. Please try again.')
       setLoading(false)
       return
     }
 
-    // Initiate one time charge
-    const oneTimePaymentRes = await stripe.confirmCardPayment(clientSecret, {
-      payment_method: {
-        card: cardElement,
-        billing_details: { email: user.email },
-        metadata: {
-          team: activeTeam.id,
-          user: user.id,
+    // Check if using saved card or new card
+    // Then initiate one time charge
+    if (hasPaymentMethod) {
+      // Use saved card
+      const paymentMethodId = paymentMethods[0].stripePaymentMethodId
+      const paymentMethodRes = await stripe.confirmCardPayment(clientSecret, {
+        payment_method: paymentMethodId,
+      })
+      if (paymentMethodRes.error) {
+        toast.error(paymentMethodRes.error.message || 'An unexpected error occurred.')
+        setLoading(false)
+        return
+      }
+    } else {
+      if (!cardElement) {
+        toast.error('There has been an issue with your payment. Please try again.')
+        setLoading(false)
+        return
+      }
+      // Use new card
+      const oneTimePaymentRes = await stripe.confirmCardPayment(clientSecret, {
+        payment_method: {
+          card: cardElement,
+          billing_details: { email: user.email },
+          metadata: {
+            team: activeTeam.id,
+            user: user.id,
+          },
         },
-      },
-      return_url: successUrl,
-    })
+        return_url: successUrl,
+      })
 
-    if (oneTimePaymentRes.error) {
-      toast.error(oneTimePaymentRes.error.message || 'An unexpected error occurred.')
-      setLoading(false)
-      return
+      if (oneTimePaymentRes.error) {
+        toast.error(oneTimePaymentRes.error.message || 'An unexpected error occurred.')
+        setLoading(false)
+        return
+      }
     }
 
     // Success
@@ -231,15 +251,30 @@ export default function PaymentForm({
         .
       </p> */}
 
-      <Button
-        disabled={
-          !ready || loading || !stripe || !elements || !isValidAmount(amountInput) || !cardComplete
-        }
-        type="submit"
-        className="mt-6"
-      >
-        {loading ? <LoaderCircle className="w-5 h-5 mr-2 animate-spin" /> : 'Purchase'}
-      </Button>
+      {hasPaymentMethod ? (
+        <Button
+          type="submit"
+          className="mt-6"
+          disabled={!elements || !stripe || loading || !isValidAmount(amountInput)}
+        >
+          {loading ? <LoaderCircle className="w-5 h-5 mr-2 animate-spin" /> : 'Purchase'}
+        </Button>
+      ) : (
+        <Button
+          disabled={
+            !ready ||
+            loading ||
+            !stripe ||
+            !elements ||
+            !isValidAmount(amountInput) ||
+            !cardComplete
+          }
+          type="submit"
+          className="mt-6"
+        >
+          {loading ? <LoaderCircle className="w-5 h-5 mr-2 animate-spin" /> : 'Purchase'}
+        </Button>
+      )}
     </form>
   )
 }

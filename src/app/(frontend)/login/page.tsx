@@ -31,7 +31,7 @@ export default function LoginPage() {
     try {
       // Submit the form data using the fetch API.
       // Note: When using FormData, content type is automatically set
-      const response = await fetch('/api/authenticate', {
+      const response = await fetch('/api/login', {
         method: 'POST',
         body: formData,
       })

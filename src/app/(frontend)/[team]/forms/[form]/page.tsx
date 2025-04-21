@@ -1,13 +1,14 @@
-import FormDropdown from '@/components/form-dropdown'
 import FormRecipientEditor from '@/components/form-recipient-editor'
 import { Button } from '@/components/ui/button'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu'
 import payload from '@/lib/payload'
+import { DropdownMenuTrigger } from '@radix-ui/react-dropdown-menu'
+import { ChevronLeft, EllipsisVertical } from 'lucide-react'
+import Link from 'next/link'
 import { formatDate } from '@/lib/utils'
 import { getUser } from '@/lib/utils-server'
-import { ColumnDef } from '@tanstack/react-table'
-import { ChevronLeft } from 'lucide-react'
-import Link from 'next/link'
 import { redirect } from 'next/navigation'
+import FormDropdown from '@/components/form-dropdown'
 
 export default async function FormPage({ params }: { params: { team: string; form: string } }) {
   const awaitedParams = await params
@@ -15,91 +16,67 @@ export default async function FormPage({ params }: { params: { team: string; for
   const user = await getUser()
   if (!user) return redirect('/login')
 
-  const verifiedRecipients: { id: string; email: string; active: boolean }[] = []
-  const formRecipients: { id: string; email: string }[] = []
-
-  // Get form
-  const formRes = await payload.findByID({
-    overrideAccess: false,
-    disableErrors: true,
-    user,
+  // Get form data
+  const formData = await payload.find({
     collection: 'forms',
-    id: awaitedParams.form,
+    where: {
+      id: { equals: awaitedParams.form },
+    },
   })
 
-  // Get reecipients
+  // Extract active recipients from form data
+  const formRecipients = formData.docs[0].recipients || []
+
+  // Find all recipients for the team
   const recipientRes = await payload.find({
-    collection: 'recipients',
     overrideAccess: false,
     disableErrors: true,
+    collection: 'recipients',
     user,
     where: {
-      verified: {
-        equals: true,
-      },
       team: {
         equals: awaitedParams.team,
       },
     },
   })
 
-  // Parse form recipients
-  if (formRes?.recipients) {
-    formRes.recipients.forEach((doc) => {
-      // Skip if doc is not an object
-      if (typeof doc !== 'object') return
-
-      // Add to formRecipients
-      formRecipients.push({
-        id: doc.id,
-        email: doc.email,
-      })
-    })
-  }
-
-  // Parse verified recipients
-  if (recipientRes?.docs) {
-    recipientRes.docs.forEach((doc) => {
-      // Skip if doc is not an object
-      if (typeof doc !== 'object') return
-
-      // Add to verifiedRecipients
-      verifiedRecipients.push({
-        id: doc.id,
-        email: doc.email,
-        active: formRecipients.some((recipient) => recipient.id === doc.id),
-      })
-    })
-  }
+  // Compare the recipients with the form recipients
+  // and set the active status accordingly
+  const recipients = recipientRes.docs.map((recipient) => {
+    return {
+      id: recipient.id,
+      email: recipient.email,
+      active: formRecipients.some((formRecipient) =>
+        typeof formRecipient === 'object' ? formRecipient.id === recipient.id : false,
+      ),
+    }
+  })
 
   return (
     <div className="flex flex-col">
-      <div className="flex justify-between">
-        <Link href={`/${awaitedParams.team}/forms`}>
-          <Button className="w-fit cursor-pointer" variant="link">
-            <ChevronLeft />
-            Back to forms
-          </Button>
-        </Link>
-        <FormDropdown teamId={awaitedParams.team} formId={awaitedParams.form} />
-      </div>
-      <div className="mt-4">
-        {!formRes ? (
+      <div className="p-4 mt-4">
+        {!formData.docs.length ? (
           'Form not found'
         ) : (
-          <div>
-            <p className="text-sm text-gray-400 mb-1">Created {formatDate(formRes.createdAt)}</p>
-            <h1 className="text-4xl font-bold mb-4">{formRes.name}</h1>
-            <p className="mb-8 w-fit">
-              Form ID:{' '}
-              <span className="text-sm ml-2 p-2 px-4 rounded-sm bg-gray-200 text-gray-700">
-                {formRes.id}
-              </span>
-            </p>
+          <div className="flex flex-col gap-8">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-muted-foreground">
+                  Created on {formatDate(formData.docs[0].createdAt)}
+                </p>
+                <h1 className="text-4xl font-bold">{formData.docs[0].name}</h1>
+              </div>{' '}
+              <FormDropdown teamId={awaitedParams.team} formId={awaitedParams.form} />
+            </div>
+            <div>
+              <h3 className="font-semibold mb-2">Form ID</h3>
+              <p className="p-2 px-4 bg-muted rounded-md w-fit font-mono">{formData.docs[0].id}</p>
+            </div>
+
             <FormRecipientEditor
+              formId={awaitedParams.form}
               teamId={awaitedParams.team}
-              formId={formRes.id}
-              recipients={verifiedRecipients}
+              recipients={recipients}
             />
           </div>
         )}

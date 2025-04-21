@@ -103,7 +103,7 @@ export async function consumeBalance({
           if (typeof owner === 'object')
             payload.sendEmail({
               to: owner.email,
-              subject: 'Low credit balance',
+              subject: 'Credit balance depleted',
               text: `Your ${team.name} team ran out of credits. Recharge your team credits or turn on auto recharge to continue service.`,
             })
         })

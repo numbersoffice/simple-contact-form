@@ -25,7 +25,7 @@ export default function CreditBalance({ amount }: CreditBalanceProps) {
             </HoverCardTrigger>
             <HoverCardContent className="text-sm">
               Your credit balance will be consumed as you receive submissions. Each submission costs
-              <span className="text-blue-400"> ${costPerSubmission}</span>
+              <span className="text-blue-400"> ${costPerSubmission / 100}</span>
             </HoverCardContent>
           </HoverCard>
         </div>

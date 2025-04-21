@@ -50,9 +50,9 @@ export default function FormRecipientEditor({
     }
   }
   return (
-    <>
+    <div>
       <div>
-        <h2 className="font-bold">Recipients</h2>
+        <h2 className="font-semibold">Recipients</h2>
         <p className="text-sm text-gray-500 mt-2 mb-4">
           Click addresses to toggle between{' '}
           <Badge variant="outline" className="text-gray-700">
@@ -62,7 +62,7 @@ export default function FormRecipientEditor({
           saved automatically)
         </p>
       </div>
-      <div className="rounded-md border-[1px] border-gray-200 p-4 mt-2 flex gap-2">
+      <div className="rounded-md border-[1px] border-gray-200 p-4 flex gap-2">
         {recipients.length > 0 ? (
           recipients.map((r) => (
             <Badge
@@ -84,6 +84,6 @@ export default function FormRecipientEditor({
           </p>
         )}
       </div>
-    </>
+    </div>
   )
 }

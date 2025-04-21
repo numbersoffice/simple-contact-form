@@ -54,8 +54,12 @@ export function TeamSwitcher({
   const [loading, setLoading] = useState(false)
   const [dialogOpen, setDialogOpen] = useState(false)
 
-  const [declineIsPending, setDeclineIsPending] = useState(false)
-  const [acceptIsPending, setAcceptIsPending] = useState(false)
+  const [declineIsPending, setDeclineIsPending] = useState<
+    { pending: boolean; inviteId: string }[]
+  >([])
+  const [acceptIsPending, setAcceptIsPending] = useState<{ pending: boolean; inviteId: string }[]>(
+    [],
+  )
 
   const activeTeamIndex = teams.findIndex((team) => team.id === activeTeamId)
 
@@ -99,7 +103,7 @@ export function TeamSwitcher({
    * @param inviteId The ID of the invite to accept
    */
   async function acceptInvite(inviteId: string) {
-    setAcceptIsPending(true)
+    setAcceptIsPending((prev) => [...prev, { pending: true, inviteId }])
 
     // Accept the invite
     const res = await fetch(`/api/invites/${inviteId}/accept`, {
@@ -128,7 +132,9 @@ export function TeamSwitcher({
       console.error('Error accepting invite:', res.statusText)
       toast.error('Error accepting invite')
     }
-    setAcceptIsPending(false)
+
+    toast.success('Invite accepted')
+    setAcceptIsPending((prev) => prev.filter((i) => i.inviteId !== inviteId))
   }
 
   /**
@@ -136,7 +142,7 @@ export function TeamSwitcher({
    * @param inviteId The ID of the invite to decline
    */
   async function declineInvite(inviteId: string) {
-    setDeclineIsPending(true)
+    setDeclineIsPending((prev) => [...prev, { pending: true, inviteId }])
 
     // Delete the invite
     const res = await fetch(`/api/invites/${inviteId}`, {
@@ -149,7 +155,7 @@ export function TeamSwitcher({
     } else {
       console.error('Error declining invite:', res.statusText)
       toast.error('Error declining invite')
-      setDeclineIsPending(false)
+      setDeclineIsPending((prev) => prev.filter((i) => i.inviteId !== inviteId))
     }
   }
 
@@ -212,35 +218,45 @@ export function TeamSwitcher({
                     Invites
                   </DropdownMenuLabel>
                 )}
-                {invites.map((invite) => (
-                  <div
-                    key={invite.id}
-                    className="flex flex-col items-center gap-2 p-2 border-2 border-amber-500 bg-amber-200 border-dashed rounded-md"
-                  >
-                    <div className="flex w-full gap-2 font-bold">{invite['team-name']}</div>
-                    <div className="grid grid-cols-2 gap-1 w-full">
-                      <SubmitButton
-                        size="sm"
-                        variant="secondary"
-                        onClick={() => declineInvite(invite.id)}
-                        loading={declineIsPending}
-                        disabled={acceptIsPending || declineIsPending}
+                <div className="flex flex-col gap-1">
+                  {invites.map((invite) => {
+                    // Check if the invite is pending
+                    const declinePending =
+                      declineIsPending.find((i) => i.inviteId === invite.id)?.pending || false
+                    const acceptPending =
+                      acceptIsPending.find((i) => i.inviteId === invite.id)?.pending || false
+
+                    return (
+                      <div
+                        key={invite.id}
+                        className="flex flex-col items-center gap-2 p-2 border-2 border-amber-500 bg-amber-200 border-dashed rounded-md"
                       >
-                        <X />
-                        Decline
-                      </SubmitButton>
-                      <SubmitButton
-                        loading={acceptIsPending}
-                        disabled={acceptIsPending || declineIsPending}
-                        size="sm"
-                        onClick={() => acceptInvite(invite.id)}
-                      >
-                        <Check color="white" />
-                        Accept
-                      </SubmitButton>
-                    </div>
-                  </div>
-                ))}
+                        <div className="flex w-full gap-2 font-bold">{invite['team-name']}</div>
+                        <div className="grid grid-cols-2 gap-1 w-full">
+                          <SubmitButton
+                            size="sm"
+                            variant="secondary"
+                            onClick={() => declineInvite(invite.id)}
+                            loading={declinePending}
+                            disabled={acceptPending || declinePending}
+                          >
+                            <X />
+                            Decline
+                          </SubmitButton>
+                          <SubmitButton
+                            loading={acceptPending}
+                            disabled={acceptPending || declinePending}
+                            size="sm"
+                            onClick={() => acceptInvite(invite.id)}
+                          >
+                            <Check color="white" />
+                            Accept
+                          </SubmitButton>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
                 <DropdownMenuSeparator />
 
                 <DialogTrigger className="w-full">
