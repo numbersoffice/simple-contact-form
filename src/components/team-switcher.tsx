@@ -240,7 +240,7 @@ export function TeamSwitcher({
                             loading={declinePending}
                             disabled={acceptPending || declinePending}
                           >
-                            <X />
+                            {/* <X /> */}
                             Decline
                           </SubmitButton>
                           <SubmitButton
@@ -249,7 +249,7 @@ export function TeamSwitcher({
                             size="sm"
                             onClick={() => acceptInvite(invite.id)}
                           >
-                            <Check color="white" />
+                            {/* <Check color="white" /> */}
                             Accept
                           </SubmitButton>
                         </div>

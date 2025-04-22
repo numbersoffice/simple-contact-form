@@ -20,7 +20,7 @@ export default function SubmitButton({
       {...props}
       disabled={loading || disabled}
       type="submit"
-      className={cn('relative', className)}
+      className={cn('relative flex flex-col items-center', className)}
     >
       <span className={loading ? 'opacity-0' : 'opacity-100'}>{children}</span>
       <LoaderCircle

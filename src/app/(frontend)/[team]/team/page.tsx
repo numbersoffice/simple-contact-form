@@ -15,7 +15,7 @@ export default async function MembersPage({ params }: { params: { team: string }
   if (!user) return redirect('/login')
 
   // Get team and invites concurrently
-  const [teamRes, invitesRes] = await Promise.all([
+  const [teamRes, invitesRes, userRes] = await Promise.all([
     payload.findByID({
       collection: 'teams',
       id: awaitedParams.team,
@@ -31,10 +31,14 @@ export default async function MembersPage({ params }: { params: { team: string }
         },
       },
     }),
+    payload.findByID({
+      collection: 'app-users',
+      id: user.id,
+    }),
   ])
 
   // Make sure all data is available
-  if (!teamRes || !invitesRes.docs) return notFound()
+  if (!teamRes || !invitesRes.docs || !userRes) return notFound()
 
   // Aggregate all users
   const owners: Form[] = []
@@ -82,8 +86,16 @@ export default async function MembersPage({ params }: { params: { team: string }
   }
 
   const data = [...owners, ...members, ...invitees]
-
   const role = data.filter((el) => el.id === user.id)[0].role as 'Owner' | 'Member'
+
+  // Check for permissions
+  const isDefaultTeam =
+    typeof userRes['default-team'] === 'object'
+      ? userRes['default-team']?.id === awaitedParams.team
+      : false
+  const canLeaveTeam =
+    (role === 'Member' || (role === 'Owner' && owners.length > 1)) && !isDefaultTeam
+  const canDeleteTeam = role === 'Owner' && !isDefaultTeam
 
   return (
     <>
@@ -91,8 +103,12 @@ export default async function MembersPage({ params }: { params: { team: string }
       <div className="p-4 lg:px-6 flex flex-col gap-4">
         <TableHeaderMembers teamName={teamRes.name} userRole={role} />
         <TableGridMembers teamId={awaitedParams.team} data={data} userRole={role} />
-        <LeaveTeam teamId={awaitedParams.team} userRole={role} teamName={teamRes.name} />
-        <DeleteTeam teamId={awaitedParams.team} userRole={role} teamName={teamRes.name} />
+        {canLeaveTeam && (
+          <LeaveTeam teamId={awaitedParams.team} userRole={role} teamName={teamRes.name} />
+        )}
+        {canDeleteTeam && (
+          <DeleteTeam teamId={awaitedParams.team} userRole={role} teamName={teamRes.name} />
+        )}
       </div>
     </>
   )
