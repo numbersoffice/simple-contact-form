@@ -1,6 +1,6 @@
 'use client'
 
-import { useAppData } from '@/app/context/app-data'
+import { useAppData } from '@/context/app-data'
 import { CardElement, useElements, useStripe } from '@stripe/react-stripe-js'
 import { CreditCard, LoaderCircle } from 'lucide-react'
 import { useRouter } from 'next/navigation'

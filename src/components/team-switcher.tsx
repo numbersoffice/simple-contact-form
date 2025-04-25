@@ -200,7 +200,7 @@ export function TeamSwitcher({
                 </DropdownMenuLabel>
                 {teams.map((team) => (
                   <DropdownMenuItem
-                    key={team.name}
+                    key={team.id}
                     onClick={() => {
                       const newUrl = replaceTeamId(window.location.href, team.id, true)
                       router.push(newUrl)

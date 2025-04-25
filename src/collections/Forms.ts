@@ -1,5 +1,5 @@
 import type { CollectionConfig } from 'payload'
-import { associatesOnly } from './utils/access'
+import { associatesOnly, ownersOnly } from './utils/access'
 
 export const Forms: CollectionConfig = {
   slug: 'forms',
@@ -30,6 +30,6 @@ export const Forms: CollectionConfig = {
     create: associatesOnly,
     read: associatesOnly,
     update: associatesOnly,
-    delete: associatesOnly,
+    delete: ownersOnly,
   },
 }

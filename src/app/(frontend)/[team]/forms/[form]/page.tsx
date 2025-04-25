@@ -1,20 +1,42 @@
+import ElementLock from '@/components/element-lock'
+import FormDropdown from '@/components/form-dropdown'
 import FormRecipientEditor from '@/components/form-recipient-editor'
-import { Button } from '@/components/ui/button'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu'
 import payload from '@/lib/payload'
-import { DropdownMenuTrigger } from '@radix-ui/react-dropdown-menu'
-import { ChevronLeft, EllipsisVertical } from 'lucide-react'
-import Link from 'next/link'
 import { formatDate } from '@/lib/utils'
 import { getUser } from '@/lib/utils-server'
 import { redirect } from 'next/navigation'
-import FormDropdown from '@/components/form-dropdown'
 
 export default async function FormPage({ params }: { params: { team: string; form: string } }) {
   const awaitedParams = await params
 
   const user = await getUser()
   if (!user) return redirect('/login')
+
+  // Get team data
+  const teamRes = await payload.find({
+    collection: 'teams',
+    user,
+    overrideAccess: false,
+    where: {
+      id: { equals: awaitedParams.team },
+    },
+  })
+
+  if (!teamRes.docs.length) {
+    return redirect('/login')
+  }
+
+  const team = typeof teamRes.docs[0] === 'object' && teamRes.docs[0]
+  if (!team) return redirect('/login')
+  const owners = team.owners?.length ? team.owners : []
+
+  // Check if the user is an owner of the team
+  const isOwner = owners.some((owner) => {
+    if (typeof owner === 'object') {
+      return owner.id === user.id
+    }
+    return false
+  })
 
   // Get form data
   const formData = await payload.find({
@@ -65,8 +87,10 @@ export default async function FormPage({ params }: { params: { team: string; for
                   Created on {formatDate(formData.docs[0].createdAt)}
                 </p>
                 <h1 className="text-4xl font-bold">{formData.docs[0].name}</h1>
-              </div>{' '}
-              <FormDropdown teamId={awaitedParams.team} formId={awaitedParams.form} />
+              </div>
+              <ElementLock locked={!isOwner}>
+                <FormDropdown teamId={awaitedParams.team} formId={awaitedParams.form} />
+              </ElementLock>
             </div>
             <div>
               <h3 className="font-semibold mb-2">Form ID</h3>

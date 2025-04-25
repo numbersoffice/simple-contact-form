@@ -15,7 +15,7 @@ import { AlertDialogAction, AlertDialogCancel } from '@radix-ui/react-alert-dial
 import React, { FormEvent } from 'react'
 import SubmitButton from '@/components/button-submit'
 import { useRouter } from 'next/navigation'
-import { useAppData } from '@/app/context/app-data'
+import { useAppData } from '@/context/app-data'
 import { toast } from 'sonner'
 
 export default function LeaveTeam() {

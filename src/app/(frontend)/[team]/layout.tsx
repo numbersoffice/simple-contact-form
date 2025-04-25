@@ -3,7 +3,7 @@ import React from 'react'
 import { headers as NextHeaders } from 'next/headers'
 import payload from '@/lib/payload'
 import { ExtendedTeam } from '@/components/app-sidebar'
-import { AppDataProvider } from '@/app/context/app-data'
+import { AppDataProvider } from '@/context/app-data'
 
 export default async function Layout(props: {
   children: React.ReactNode
