@@ -25,6 +25,13 @@ export default async function Layout(props: {
     user,
   })
 
+  // Get app-user
+  const appUser = await payload.findByID({
+    collection: 'app-users',
+    id: user.id,
+  })
+  if (!appUser) return null
+
   const teams: ExtendedTeam[] = docs.map((team) => {
     // Make sure owners are defined
     if (!team.owners) return { ...team, role: 'member' }
@@ -63,7 +70,7 @@ export default async function Layout(props: {
   }
 
   return (
-    <AppDataProvider team={currentTeam}>
+    <AppDataProvider team={currentTeam} appUser={appUser}>
       <Dashboard
         user={user}
         teams={teams}

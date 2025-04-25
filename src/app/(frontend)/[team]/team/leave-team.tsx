@@ -14,19 +14,46 @@ import {
 import { AlertDialogAction, AlertDialogCancel } from '@radix-ui/react-alert-dialog'
 import React, { FormEvent } from 'react'
 import SubmitButton from '@/components/button-submit'
-import { set } from 'zod'
+import { useRouter } from 'next/navigation'
+import { useAppData } from '@/app/context/app-data'
+import { toast } from 'sonner'
 
-export default function LeaveTeam({
-  userRole,
-  teamId,
-  teamName,
-}: {
-  userRole: string
-  teamId: string
-  teamName: string
-}) {
+export default function LeaveTeam() {
+  const router = useRouter()
+  const { activeTeam, appUser } = useAppData()
+
   const [open, setOpen] = React.useState(false)
   const [loading, setLoading] = React.useState(false)
+
+  async function handleLeaveTeam(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault()
+
+    setLoading(true)
+
+    const res = await fetch(`/api/teams/${activeTeam.id}/members/${appUser.id}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+
+    if (res.ok) {
+      setOpen(false)
+
+      // Navigate to default team after leaving
+      const defaultTeamId =
+        typeof appUser['default-team'] === 'object' && appUser['default-team']?.id
+
+      router.push(`/${defaultTeamId}/team`)
+
+      toast.success('You have left ' + activeTeam.name + '. Redirecting to your default team...')
+    } else {
+      const data = await res.json()
+      console.error(data)
+      toast.error(data.message || 'Something went wrong')
+    }
+    setLoading(false)
+  }
 
   return (
     <AlertDialog onOpenChange={setOpen} open={open}>
@@ -48,7 +75,8 @@ export default function LeaveTeam({
         <AlertDialogHeader>
           <AlertDialogTitle>Are you sure?</AlertDialogTitle>
           <AlertDialogDescription>
-            You will loose access to any forms of the <span className="font-bold">{teamName} </span>
+            You will loose access to any forms of the{' '}
+            <span className="font-bold">{activeTeam.name} </span>
             team.
           </AlertDialogDescription>
         </AlertDialogHeader>
@@ -64,16 +92,7 @@ export default function LeaveTeam({
               variant="destructive"
               type="submit"
               loading={loading}
-              onClick={(e: FormEvent) => {
-                e.preventDefault()
-                setLoading(true)
-                setTimeout(() => {
-                  setOpen(false)
-                }, 3000)
-                setTimeout(() => {
-                  setLoading(false)
-                }, 4000)
-              }}
+              onClick={handleLeaveTeam}
             >
               Confirm Leave
             </SubmitButton>

@@ -1,5 +1,6 @@
 import type { CollectionConfig } from 'payload'
 import { adminsOnly, ownersOnly } from './utils/access'
+import stripe from '@/lib/stripe'
 
 export const PaymentMethods: CollectionConfig = {
   slug: 'payment-methods',
@@ -93,5 +94,39 @@ export const PaymentMethods: CollectionConfig = {
     read: ownersOnly,
     update: adminsOnly,
     delete: adminsOnly,
+  },
+  hooks: {
+    beforeDelete: [
+      // Remove payment method from Stripe
+      async ({ req, id }) => {
+        // Get payment method
+        const paymentMethod = await req.payload.findByID({
+          collection: 'payment-methods',
+          id,
+        })
+
+        // Make sure payment method is an object
+        if (typeof paymentMethod === 'object') {
+          // Detach payment method from Stripe
+          await stripe.paymentMethods.detach(paymentMethod.stripePaymentMethodId).catch((err) => {
+            if (err.statusCode !== 400) {
+              console.error(err)
+            }
+          })
+
+          // Make sure team is an object
+          if (typeof paymentMethod.team === 'object') {
+            // Turn off auto-recharge
+            await req.payload.update({
+              collection: 'teams',
+              id: paymentMethod.team.id,
+              data: {
+                autoRecharge: false,
+              },
+            })
+          }
+        }
+      },
+    ],
   },
 }

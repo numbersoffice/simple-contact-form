@@ -9,34 +9,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
 export async function POST(request: Request) {
   try {
     const payloadData = await request.json()
-    const amount = payloadData.data.object.amount
-    const autoRecharge = payloadData.data.object.metadata.autoRecharge
     const teamId = payloadData.data.object.metadata.team
-    const futureUse = payloadData.data.object.metadata.futureUse
-
-    // Check if the webhook is for a successful charge
-    if (payloadData.type === 'charge.succeeded') {
-      // Get current balance
-      const { balance, autoRecharge: autoRechargeExisting } = await payload.findByID({
-        collection: 'teams',
-        id: teamId,
-      })
-
-      console.log(balance)
-
-      // Check if future use is already on to account for automatic refills
-
-      // Update the team's balance
-      await payload.update({
-        collection: 'teams',
-        id: teamId,
-        data: {
-          balance: balance !== undefined || balance !== null ? balance + amount : 0,
-          autoRecharge:
-            autoRechargeExisting || (futureUse && autoRecharge === 'true') ? true : false,
-        },
-      })
-    }
 
     // Payment method was attached successfully
     if (payloadData.type === 'payment_method.attached') {
@@ -90,6 +63,18 @@ export async function POST(request: Request) {
           },
         })
       }
+    }
+
+    if (payloadData.type === 'payment_method.detached') {
+      // Remove the payment method from db
+      await payload.delete({
+        collection: 'payment-methods',
+        where: {
+          stripePaymentMethodId: {
+            equals: payloadData.data.object.id,
+          },
+        },
+      })
     }
 
     return new Response('Webhook received', { status: 200 })

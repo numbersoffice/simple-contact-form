@@ -81,6 +81,44 @@ export const Teams: CollectionConfig = {
         return data
       },
     ],
+    beforeDelete: [
+      // Remove all forms and payment methods
+      async ({ req, id }) => {
+        // Delete forms
+        await req.payload.delete({
+          collection: 'forms',
+          where: {
+            team: {
+              equals: id,
+            },
+          },
+        })
+
+        // Delete payment methods from Payload
+        await req.payload.delete({
+          collection: 'payment-methods',
+          where: {
+            team: {
+              equals: id,
+            },
+          },
+        })
+
+        // Delete recipients
+        await req.payload.delete({
+          collection: 'recipients',
+          where: {
+            team: {
+              equals: id,
+            },
+          },
+        })
+
+        // ---------------------------------------------------------------------------------------------------
+        // beforeDelete hook of payment-methods collection will handle deleting the payment method from Stripe
+        // ---------------------------------------------------------------------------------------------------
+      },
+    ],
   },
   endpoints: [
     // Remove a team member
@@ -113,30 +151,51 @@ export const Teams: CollectionConfig = {
           return Response.json({ message: 'Team not found' }, { status: 404 })
         }
 
-        // Check if user is member or owner
-        const user = req.user
-        const isMember = teamRes.members?.some((member) => {
-          if (typeof member !== 'object') return false
-          return member.id === user.id
+        // Get user to be removed
+        // Check if user exists
+        const userToBeDeletedRes = await req.payload.findByID({
+          collection: 'app-users',
+          id: memberId,
         })
-        const isOwner = teamRes.owners?.some((owner) => {
+
+        if (!userToBeDeletedRes || typeof userToBeDeletedRes !== 'object') {
+          console.log('User not found')
+          return Response.json({ message: 'User not found' }, { status: 404 })
+        }
+
+        // Check if initiating user is member or owner
+        const initiatingUser = req.user
+        const initiatingUserIsMember = teamRes.members?.some((member) => {
+          if (typeof member !== 'object') return false
+          return member.id === initiatingUser.id
+        })
+        const initiatingUserIsOwner = teamRes.owners?.some((owner) => {
           if (typeof owner !== 'object') return false
-          return owner.id === user.id
+          return owner.id === initiatingUser.id
+        })
+
+        // Check if user to be removed is member
+        const userToBeRemovedIsOwner = teamRes.owners?.some((owner) => {
+          if (typeof owner !== 'object') return false
+          return owner.id === userToBeDeletedRes.id
         })
 
         // Check user permission to remove member
         // User is not part of the team
-        if (!isMember && !isOwner) {
+        if (!initiatingUserIsMember && !isOwner) {
+          console.log('User is not a member or owner')
           return Response.json({ message: 'Unauthorized' }, { status: 401 })
         }
 
         // User is last owner
-        if (isOwner && teamRes.owners?.length === 1) {
+        if (initiatingUserIsOwner && teamRes.owners?.length === 1 && userToBeRemovedIsOwner) {
+          console.log('User is last owner')
           return Response.json({ message: 'You cannot remove the last owner' }, { status: 401 })
         }
 
         // User is member and not trying to remove themselves
-        if (isMember && user.id !== memberId) {
+        if (initiatingUserIsMember && initiatingUser.id !== memberId) {
+          console.log('User is a member trying to remove themselves')
           return Response.json({ message: 'Unauthorized' }, { status: 401 })
         }
 

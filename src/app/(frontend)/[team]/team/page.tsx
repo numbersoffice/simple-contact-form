@@ -101,14 +101,12 @@ export default async function MembersPage({ params }: { params: { team: string }
     <>
       <HeaderPage title="Team" />
       <div className="p-4 lg:px-6 flex flex-col gap-4">
-        <TableHeaderMembers teamName={teamRes.name} userRole={role} />
-        <TableGridMembers teamId={awaitedParams.team} data={data} userRole={role} />
-        {canLeaveTeam && (
-          <LeaveTeam teamId={awaitedParams.team} userRole={role} teamName={teamRes.name} />
-        )}
-        {canDeleteTeam && (
-          <DeleteTeam teamId={awaitedParams.team} userRole={role} teamName={teamRes.name} />
-        )}
+        <div>
+          <TableHeaderMembers teamName={teamRes.name} userRole={role} />
+          <TableGridMembers teamId={awaitedParams.team} data={data} userRole={role} />
+        </div>
+        {canLeaveTeam && <LeaveTeam />}
+        {canDeleteTeam && <DeleteTeam />}
       </div>
     </>
   )
