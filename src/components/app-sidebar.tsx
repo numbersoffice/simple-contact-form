@@ -16,6 +16,8 @@ import { AppUser, Invite, Team } from '@/payload-types'
 import { FileText, LogOut, MailCheck, Settings, Users, Wallet } from 'lucide-react'
 import { usePathname, useRouter } from 'next/navigation'
 import { TeamSwitcher } from './team-switcher'
+import { useAppData } from '@/context/app-data'
+import ElementLock from './element-lock'
 
 // Properly extend team type
 export interface ExtendedTeam extends Team {
@@ -35,6 +37,7 @@ export function AppSidebar({
 }) {
   const router = useRouter()
   const pathname = usePathname()
+  const { userRole } = useAppData()
 
   const data = {
     nav: [
@@ -42,21 +45,25 @@ export function AppSidebar({
         title: 'Forms',
         url: `/${activeTeamId}/forms`,
         icon: FileText,
+        ownerOnly: false,
       },
       {
         title: 'Recipients',
         url: `/${activeTeamId}/recipients`,
         icon: MailCheck,
+        ownerOnly: false,
       },
       {
         title: 'Team',
         url: `/${activeTeamId}/team`,
         icon: Users,
+        ownerOnly: false,
       },
       {
         title: 'Credits',
         url: `/${activeTeamId}/billing`,
         icon: Wallet,
+        ownerOnly: true,
       },
     ],
   }
@@ -97,19 +104,24 @@ export function AppSidebar({
           <SidebarGroupLabel>Application</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {data.nav.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <a
-                      href={item.url}
-                      className={pathname.includes(item.url) ? 'border-gray-300 font-bold' : ''}
-                    >
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </a>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+              {data.nav.map((item) => {
+                const locked = item.ownerOnly && userRole !== 'owner'
+                return (
+                  <ElementLock locked={locked} key={item.title} side="right" sideOffset={-150}>
+                    <SidebarMenuItem>
+                      <SidebarMenuButton asChild>
+                        <a
+                          href={item.url}
+                          className={pathname.includes(item.url) ? 'border-gray-300 font-bold' : ''}
+                        >
+                          <item.icon />
+                          <span>{item.title}</span>
+                        </a>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  </ElementLock>
+                )
+              })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

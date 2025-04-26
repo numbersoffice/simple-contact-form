@@ -69,8 +69,18 @@ export default async function Layout(props: {
     )
   }
 
+  // Get user role
+  const userRole = currentTeam.owners?.some((owner) => {
+    if (typeof owner === 'object') {
+      return owner.id === user.id
+    }
+    return false
+  })
+    ? 'owner'
+    : 'member'
+
   return (
-    <AppDataProvider team={currentTeam} appUser={appUser}>
+    <AppDataProvider team={currentTeam} appUser={appUser} userRole={userRole}>
       <Dashboard
         user={user}
         teams={teams}

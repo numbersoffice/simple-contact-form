@@ -66,7 +66,7 @@ export default function LeaveTeam() {
             </CardDescription>
           </div>
           <AlertDialogTrigger asChild>
-            <Button variant="secondary">Leave team</Button>
+            <Button variant="destructive">Leave team</Button>
           </AlertDialogTrigger>
         </CardHeader>
       </Card>

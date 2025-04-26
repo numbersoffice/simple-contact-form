@@ -63,7 +63,7 @@ export default function DeleteTeam() {
             </CardDescription>
           </div>
           <AlertDialogTrigger asChild>
-            <Button variant="secondary">Delete team</Button>
+            <Button variant="destructive">Delete team</Button>
           </AlertDialogTrigger>
         </CardHeader>
       </Card>

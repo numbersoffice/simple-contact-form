@@ -79,7 +79,7 @@ export default function TableGridForms<TData, TValue>({
                       </div>
                     ) : (
                       <div
-                        className="flex items-center gap-2"
+                        className="flex items-center gap-2 w-fit"
                         onClick={(e) => {
                           e.stopPropagation()
 

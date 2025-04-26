@@ -69,17 +69,17 @@ export default function RecipientTableHeader({
     }
   }
 
-  if (_role !== 'owner') return null
-
   return (
     <div className="flex justify-between mb-2 items-center">
       <h3 className="font-semibold">Members</h3>
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogTrigger asChild>
-          <Button variant="outline">
-            <Plus /> Invite member
-          </Button>
-        </DialogTrigger>
+        {_role === 'owner' && (
+          <DialogTrigger asChild>
+            <Button variant="outline">
+              <Plus /> Invite member
+            </Button>
+          </DialogTrigger>
+        )}
 
         <DialogContent>
           <DialogHeader>

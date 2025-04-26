@@ -1,6 +1,7 @@
 import type { CollectionConfig, PayloadRequest } from 'payload'
 import { associatesOnly } from './utils/access'
 import { VerifiationTokenField } from './custom-fields/verification-token'
+import { Recipient } from '@/payload-types'
 
 export const Recipients: CollectionConfig = {
   slug: 'recipients',
@@ -97,8 +98,44 @@ export const Recipients: CollectionConfig = {
         }
       },
     ],
+    beforeDelete: [
+      // Remove recipient from all forms when being deleted
+      async ({ id, req }) => {
+        // Get all forms with this recipient
+        const forms = await req.payload.find({
+          collection: 'forms',
+          where: {
+            recipients: {
+              contains: id,
+            },
+          },
+        })
+
+        // Update each form to remove the recipient
+        forms.docs.forEach((form) => {
+          const recipients = form.recipients ? form.recipients : []
+          const updatedRecipients = recipients.filter((r) => {
+            // Return true for strings to not cause unintended side effects down the road
+            // Removing old data should be an explicit function
+            if (typeof r !== 'object') return true
+            if (r.id !== id) return true
+            return false
+          })
+
+          req.payload.update({
+            collection: 'forms',
+            id: form.id,
+            data: {
+              ...form,
+              recipients: updatedRecipients,
+            },
+          })
+        })
+      },
+    ],
   },
   endpoints: [
+    // Verify invite
     {
       path: '/:id/verify',
       method: 'get',
@@ -137,6 +174,69 @@ export const Recipients: CollectionConfig = {
         }
 
         return Response.json('Recipient verification failed.')
+      },
+    },
+    // Resend verification
+    {
+      path: '/:id/resend',
+      method: 'post',
+      handler: async (req: PayloadRequest) => {
+        try {
+          // Check for required parameters
+          const docId = req.routeParams?.id as string
+          if (!docId) throw new Error('Missing parameter: id')
+
+          // Make sure user is authenticated and authorized
+          const user = req.user
+          if (!user || user.collection !== 'app-users') throw new Error('Team not found.')
+
+          // Get doc data
+          const doc = await req.payload.findByID({
+            collection: 'recipients',
+            id: docId,
+          })
+
+          // Check if user is team owner or member
+          if (typeof doc.team !== 'object') throw new Error('Couldn not find team')
+          if (typeof doc.team.owners !== 'object' && typeof doc.team.owners !== 'object')
+            throw new Error('User not part of team')
+
+          const isOwner =
+            doc.team.owners?.some((el) => {
+              if (typeof el === 'object') {
+                if (el.id === user.id) return true
+              }
+            }) || false
+
+          const isMember =
+            doc.team.members?.some((el) => {
+              if (typeof el === 'object') {
+                if (el.id === user.id) return true
+              }
+            }) || false
+
+          if (!isOwner && !isMember) throw new Error('User not part of team')
+
+          // Verification url
+          const url =
+            process.env.NEXT_PUBLIC_HOST_URL +
+            '/api/recipients/' +
+            docId +
+            '/verify?token=' +
+            doc.verificationToken
+
+          // Send verification email
+          await req.payload.sendEmail({
+            to: doc.email,
+            subject: 'Verify recipient email',
+            html: `<p>Click <a href="${url}">here</a> to finish adding ${doc.email} as a recipient email to Simple Contact Form.</p>`,
+            text: `Copy the following url into your browser to finish adding ${doc.email} as a recipient email to Simple Contact Form: ${url}`,
+          })
+        } catch (err) {
+          Response.json(err, { status: 500 })
+        }
+
+        return Response.json('Successfully verified recipient email.')
       },
     },
   ],

@@ -5,6 +5,7 @@ import CreditTopUp from './credit-top-up'
 import { headers } from 'next/headers'
 import payload from '@/lib/payload'
 import AutoRecharge from './auto-recharge'
+import { redirect } from 'next/navigation'
 
 export default async function BillingPage({ params }: { params: { team: string } }) {
   const { team } = await params
@@ -24,10 +25,20 @@ export default async function BillingPage({ params }: { params: { team: string }
     )
   }
 
-  const { balance, autoRecharge } = await payload.findByID({
+  // Get team
+  const { balance, autoRecharge, owners } = await payload.findByID({
     collection: 'teams',
     id: team,
   })
+
+  // Make sure only owners can access this page
+  if (!owners) return null
+  const isOwner = owners.some((owner) => {
+    if (typeof owner === 'string') return false
+    else return owner.id === authResult.user?.id ? true : false
+  })
+  // Send to forms page if not owner
+  if (!isOwner) redirect(`/${team}/forms`)
 
   const paymentMethod = await payload.find({
     collection: 'payment-methods',

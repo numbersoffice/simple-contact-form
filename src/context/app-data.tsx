@@ -7,6 +7,7 @@ interface AppDataContextValue {
   activeTeam: Team
   setActiveTeam: React.Dispatch<React.SetStateAction<Team>>
   appUser: AppUser
+  userRole: 'owner' | 'member'
 }
 
 // Create the context
@@ -17,12 +18,16 @@ export const AppDataProvider: React.FC<{
   children: React.ReactNode
   team: Team
   appUser: AppUser
-}> = ({ children, team, appUser }) => {
+  userRole: 'owner' | 'member'
+}> = ({ children, team, appUser, userRole }) => {
   const [activeTeam, setActiveTeam] = useState<Team>(team)
-  const [_appUser, _setAppUser] = useState<AppUser>(appUser)
+  const [_appUser] = useState<AppUser>(appUser)
+  const [_userRole] = useState<'owner' | 'member'>(userRole)
 
   return (
-    <AppDataContext.Provider value={{ activeTeam, setActiveTeam, appUser: _appUser }}>
+    <AppDataContext.Provider
+      value={{ activeTeam, setActiveTeam, appUser: _appUser, userRole: _userRole }}
+    >
       {children}
     </AppDataContext.Provider>
   )

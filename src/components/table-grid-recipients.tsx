@@ -11,6 +11,8 @@ import {
 import { Team } from '@/payload-types'
 import { ColumnDef, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table'
 import { Badge } from './ui/badge'
+import GridRowActionsRecipientInvite from './grid-row-actions-recipient'
+import { useAppData } from '@/context/app-data'
 
 export type Form = {
   id: string
@@ -20,14 +22,42 @@ export type Form = {
 }
 
 interface DataTableProps<TData, TValue> {
-  columns: ColumnDef<TData, TValue>[]
   data: TData[]
 }
 
-export default function TableGridRecipients<TData, TValue>({
-  columns,
+export default function TableGridRecipients<TData extends { status: boolean; id: string }, TValue>({
   data,
 }: DataTableProps<TData, TValue>) {
+  const { activeTeam } = useAppData()
+
+  const columns: ColumnDef<TData>[] = [
+    {
+      accessorKey: 'email',
+      header: 'Email',
+    },
+    {
+      accessorKey: 'status',
+      header: 'Status',
+      cell: ({ cell }) => (
+        <Badge className={cell.getValue() ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-600'}>
+          {cell.getValue() ? 'Verified' : 'Pending'}
+        </Badge>
+      ),
+    },
+    {
+      id: 'actions',
+      cell: ({ row }) => {
+        return (
+          <GridRowActionsRecipientInvite
+            pending={!row.original.status}
+            teamId={activeTeam.id}
+            recipientId={row.original.id}
+          />
+        )
+      },
+    },
+  ]
+
   const table = useReactTable({
     data,
     columns,
@@ -60,23 +90,14 @@ export default function TableGridRecipients<TData, TValue>({
                 key={row.id}
                 data-state={row.getIsSelected() && 'selected'}
               >
-                {row.getVisibleCells().map((cell, i) =>
-                  i === 0 ? (
-                    <TableCell key={cell.id}>
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </TableCell>
-                  ) : (
-                    <TableCell key={cell.id}>
-                      <Badge
-                        className={
-                          cell.getValue() ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-600'
-                        }
-                      >
-                        {cell.getValue() ? 'Verified' : 'Pending'}
-                      </Badge>
-                    </TableCell>
-                  ),
-                )}
+                {row.getVisibleCells().map((cell) => (
+                  <TableCell
+                    key={cell.id}
+                    className={cell.column.columnDef.id === 'actions' ? 'px-0' : ''}
+                  >
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </TableCell>
+                ))}
               </TableRow>
             ))
           ) : (
