@@ -1,11 +1,7 @@
-import payload from '@/lib/payload'
-import { cookies } from 'next/headers'
 import { SignupFormSchema } from '@/lib/definitions'
+import payload from '@/lib/payload'
 
 export async function POST(request: Request) {
-  // Await the cookie store
-  const cookieStore = await cookies()
-
   try {
     // Parse the Form Data from the request
     const formData = await request.formData()

@@ -5,7 +5,7 @@ import { getUser } from '@/lib/utils-server'
 import { ColumnDef } from '@tanstack/react-table'
 import { redirect } from 'next/navigation'
 
-export const columns: ColumnDef<Form>[] = [
+const columns: ColumnDef<Form>[] = [
   {
     accessorKey: 'name',
     header: 'Name',
@@ -16,7 +16,7 @@ export const columns: ColumnDef<Form>[] = [
   },
 ]
 
-export default async function FormsPage({ params }: { params: { team: string } }) {
+export default async function FormsPage({ params }: { params: Promise<{ team: string }> }) {
   const awaitedParams = await params
 
   const user = await getUser()

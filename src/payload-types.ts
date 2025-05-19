@@ -238,10 +238,10 @@ export interface Team {
  * via the `definition` "forms".
  */
 export interface Form {
-  id: string;
   name: string;
   team: string | Team;
   recipients?: (string | Recipient)[] | null;
+  id: string;
   updatedAt: string;
   createdAt: string;
 }
@@ -449,6 +449,7 @@ export interface FormsSelect<T extends boolean = true> {
   name?: T;
   team?: T;
   recipients?: T;
+  id?: T;
   updatedAt?: T;
   createdAt?: T;
 }

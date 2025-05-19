@@ -28,7 +28,7 @@ export default function CreditTopUp({
   const [dialogOpen, setDialogOpen] = useState(false)
 
   return (
-    <StripeElementsProvider email={user.email}>
+    <StripeElementsProvider>
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogTrigger asChild>
           <Button variant="secondary" className="w-fit">

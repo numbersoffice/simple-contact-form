@@ -3,6 +3,7 @@
 import { MailX, MoreHorizontal, Repeat } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
+import { toast } from 'sonner'
 import SubmitButton from './button-submit'
 import { Button } from './ui/button'
 import {
@@ -17,11 +18,9 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from './ui/dropdown-menu'
-import { toast } from 'sonner'
 
 export default function GridRowActionsRecipientInvite({
   teamId,

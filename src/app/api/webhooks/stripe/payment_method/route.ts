@@ -9,7 +9,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
 export async function POST(request: Request) {
   try {
     const payloadData = await request.json()
-    const teamId = payloadData.data.object.metadata.team
+    const metadata = payloadData.data.object.metadata
 
     // Payment method was attached successfully
     if (payloadData.type === 'payment_method.attached') {
@@ -18,11 +18,13 @@ export async function POST(request: Request) {
         collection: 'payment-methods',
         where: {
           team: {
-            equals: teamId,
+            equals: payloadData.data.object.metadata.team,
           },
         },
         limit: 1,
       })
+
+      // Check if the payment method already exists
       if (existingPaymentMethod.docs.length > 0) {
         // Update the existing payment method
         await payload.update({
@@ -50,7 +52,7 @@ export async function POST(request: Request) {
         await payload.create({
           collection: 'payment-methods',
           data: {
-            team: teamId,
+            team: payloadData.data.object.metadata.team,
             stripePaymentMethodId: payloadData.data.object.id,
             stripeCustomerId: payloadData.data.object.customer,
             stripeFingerprint: payloadData.data.object.card.fingerprint,
@@ -62,6 +64,32 @@ export async function POST(request: Request) {
             expiryYear: payloadData.data.object.card.exp_year,
           },
         })
+      }
+
+      // Check if customer has a billing address in stripe
+      const customer = await stripe.customers.retrieve(payloadData.data.object.customer, {
+        expand: ['default_source'],
+      })
+
+      // Parse address from payload
+      const newAddress = metadata.address && JSON.parse(metadata.address)
+
+      if (newAddress) {
+        await stripe.customers
+          .update(customer.id, {
+            name: newAddress.value.name,
+            address: {
+              city: newAddress.value.address.city,
+              country: newAddress.value.address.country,
+              line1: newAddress.value.address.line1,
+              line2: newAddress.value.address.line2,
+              postal_code: newAddress.value.address.postal_code,
+              state: newAddress.value.address.state,
+            },
+          })
+          .catch((error) => {
+            console.error('Error updating customer address:', error)
+          })
       }
     }
 

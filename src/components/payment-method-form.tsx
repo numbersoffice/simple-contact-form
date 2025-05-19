@@ -2,13 +2,14 @@
 
 import { useAppData } from '@/context/app-data'
 import { AppUser } from '@/payload-types'
-import { CardElement, useElements, useStripe } from '@stripe/react-stripe-js'
+import { CardElement, useElements, useStripe, AddressElement } from '@stripe/react-stripe-js'
 import { LoaderCircle } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { Button } from './ui/button'
 import { Label } from './ui/label'
+import { Checkbox } from './ui/checkbox'
 
 export default function PaymentMethodForm({
   user,
@@ -29,6 +30,9 @@ export default function PaymentMethodForm({
   const [loading, setLoading] = useState(false)
   const [ready, setReady] = useState(false)
   const [cardComplete, setCardComplete] = useState(false)
+  const [addressComplete, setAddressComplete] = useState(false)
+
+  const [addAddress, setAddAddress] = useState(false)
 
   /**
    * Handle adding or replacing payment method
@@ -46,19 +50,22 @@ export default function PaymentMethodForm({
     // Start spinner
     setLoading(true)
 
+    // Retrieve address info from Stripe Elements
+    const addressElement = elements.getElement(AddressElement)
+    const addressData = addressElement && (await addressElement.getValue())
+
     // Get payment intent client secret
     const setupIntentRes = await fetch('/api/create-setup-intent', {
       method: 'POST',
       body: JSON.stringify({
         user: user.id,
         email: user.email,
-        team: activeTeam.id,
       }),
     })
     const { clientSecret, error } = await setupIntentRes.json()
 
     if (!clientSecret || error) {
-      toast.error('There has been an issue adding your payment method. Please try again.')
+      toast.error('Payment could not be set up. Please try again.')
       setLoading(false)
       return
     }
@@ -66,7 +73,7 @@ export default function PaymentMethodForm({
     // Retrieve card info from Stripe Elements
     const cardElement = elements.getElement(CardElement)
     if (!cardElement) {
-      toast.error('There has been an issue adding your payment method. Please try again.')
+      toast.error('Could not retrieve card info. Please try again.')
       setLoading(false)
       return
     }
@@ -80,7 +87,9 @@ export default function PaymentMethodForm({
         },
         metadata: {
           user: user.id,
+          email: user.email,
           team: activeTeam.id,
+          address: addressData ? JSON.stringify(addressData) : null,
         },
       },
     })
@@ -88,7 +97,7 @@ export default function PaymentMethodForm({
     if (stripeError) {
       setLoading(false)
       setErrorMessage(stripeError.message || 'An unknown error occurred.')
-      toast.error('There has been an issue adding your payment method. Please try again.')
+      toast.error('Payment processing error. Please try again.')
       return
     }
 
@@ -109,8 +118,11 @@ export default function PaymentMethodForm({
       </Label>
       <CardElement
         id="card-element"
-        className={`border-input w-full min-w-0 rounded-md border px-3 py-[12px] text-base shadow-xs duration-300 ${ready ? 'opacity-100 height-fit' : 'opacity-0 height-0'}`}
+        className="mb-3 border-input w-full min-w-0 rounded-md border px-3 py-[12px] text-base shadow-xs duration-300"
         onReady={() => setReady(true)}
+        options={{
+          disableLink: true,
+        }}
         onChange={(event) => {
           if (event.error) setErrorMessage(event.error.message)
           else setErrorMessage(null)
@@ -120,15 +132,52 @@ export default function PaymentMethodForm({
       />
 
       {errorMessage && (
-        <p className="text-red-400 text-sm mt-2 p-2 px-4 bg-red-100 rounded-md border-red-400 border-[1px]">
+        <p className="text-red-400 text-sm mb-2 p-2 px-4 bg-red-100 rounded-md border-red-400 border-[1px]">
           {errorMessage}
         </p>
       )}
 
+      <div className="flex items-center space-x-2 mt-2">
+        <Checkbox
+          checked={addAddress}
+          onCheckedChange={(checked) => setAddAddress(checked === true)}
+          name="billing-address"
+          id="billing-address"
+        />
+        <label htmlFor="billing-address" className="text-sm leading-none">
+          Add billing address for receipts
+        </label>
+      </div>
+
+      <div className={`mt-4 ${addAddress ? 'opacity-100 h-auto pb-4 pt-2' : 'opacity-0 h-0'}`}>
+        {/* <Label htmlFor="address-element" className="mb-4 mt-4">
+          Address
+        </Label> */}
+        <AddressElement
+          id="address-element"
+          options={{ mode: 'billing', autocomplete: { mode: 'disabled' } }}
+          onChange={(event) => {
+            // Track whether the user has fully completed the address form
+            setAddressComplete(event.complete)
+          }}
+        />
+      </div>
+
       <Button
-        disabled={!ready || loading || !stripe || !elements || !cardComplete}
+        disabled={
+          // Check if statusis loading
+          loading ||
+          // Check if stripe and elements are loaded
+          !ready ||
+          !stripe ||
+          !elements ||
+          // Check if card is complete
+          !cardComplete ||
+          // If address is required, check if it's complete
+          (addAddress && !addressComplete)
+        }
         type="submit"
-        className="mt-6"
+        className="mt-2"
       >
         {loading ? (
           <LoaderCircle className="w-5 h-5 mr-2 animate-spin" />

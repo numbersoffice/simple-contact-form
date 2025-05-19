@@ -21,7 +21,7 @@ export type Form = {
   status: boolean
 }
 
-interface DataTableProps<TData, TValue> {
+interface DataTableProps<TData, _TValue> {
   data: TData[]
 }
 

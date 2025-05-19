@@ -1,6 +1,6 @@
 'use client'
 
-import { Check, ChevronsUpDown, Plus, X } from 'lucide-react'
+import { ChevronsUpDown, Plus } from 'lucide-react'
 import * as React from 'react'
 
 import {
@@ -41,12 +41,10 @@ import { Label } from './ui/label'
 export function TeamSwitcher({
   teams,
   activeTeamId,
-  activeTeamName,
   invites,
 }: {
   teams: ExtendedTeam[]
   activeTeamId: string
-  activeTeamName: string
   invites: Invite[]
 }) {
   const { isMobile } = useSidebar()
@@ -176,7 +174,7 @@ export function TeamSwitcher({
                     </Badge>
                   )}
                   <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground font-bold">
-                    {activeTeamName.charAt(0).toUpperCase()}
+                    {teams[activeTeamIndex]?.name.charAt(0).toUpperCase()}
                   </div>
                   <div className="grid flex-1 text-left text-sm leading-tight">
                     <span className="truncate font-semibold">

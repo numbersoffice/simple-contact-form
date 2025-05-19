@@ -1,4 +1,3 @@
-import { HeaderPage } from '@/components/header-page'
 import CreditBalance from './credit-balance'
 import PaymentMethods from './payment-methods'
 import CreditTopUp from './credit-top-up'
@@ -7,7 +6,7 @@ import payload from '@/lib/payload'
 import AutoRecharge from './auto-recharge'
 import { redirect } from 'next/navigation'
 
-export default async function BillingPage({ params }: { params: { team: string } }) {
+export default async function BillingPage({ params }: { params: Promise<{ team: string }> }) {
   const { team } = await params
   const _headers = await headers()
   const host = _headers.get('x-forwarded-host')
@@ -52,22 +51,19 @@ export default async function BillingPage({ params }: { params: { team: string }
 
   return (
     <>
-      <HeaderPage title="Billing" description="Manage your credits and payment methods" />
-      <div className="p-4 lg:px-6 flex flex-col gap-8">
-        <div className="flex flex-col gap-4">
-          <CreditBalance amount={balance ? balance : 0} />
-          <CreditTopUp
-            host={host}
-            protocol={protocol}
-            user={authResult.user}
-            paymentMethods={paymentMethod.docs}
-          />
-          <AutoRecharge
-            autoRecharge={autoRecharge || false}
-            teamId={team}
-            paymentMethods={paymentMethod.docs}
-          />
-        </div>
+      <div className="flex flex-col gap-4">
+        <CreditBalance amount={balance ? balance : 0} />
+        <CreditTopUp
+          host={host}
+          protocol={protocol}
+          user={authResult.user}
+          paymentMethods={paymentMethod.docs}
+        />
+        <AutoRecharge
+          autoRecharge={autoRecharge || false}
+          teamId={team}
+          paymentMethods={paymentMethod.docs}
+        />
         <PaymentMethods data={paymentMethod.docs} user={authResult.user} />
       </div>
     </>

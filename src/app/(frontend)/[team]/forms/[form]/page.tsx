@@ -1,12 +1,19 @@
 import ElementLock from '@/components/element-lock'
 import FormDropdown from '@/components/form-dropdown'
 import FormRecipientEditor from '@/components/form-recipient-editor'
+import { Button } from '@/components/ui/button'
 import payload from '@/lib/payload'
 import { formatDate } from '@/lib/utils'
 import { getUser } from '@/lib/utils-server'
+import { ChevronLeft } from 'lucide-react'
+import Link from 'next/link'
 import { redirect } from 'next/navigation'
 
-export default async function FormPage({ params }: { params: { team: string; form: string } }) {
+export default async function FormPage({
+  params,
+}: {
+  params: Promise<{ team: string; form: string }>
+}) {
   const awaitedParams = await params
 
   const user = await getUser()
@@ -38,29 +45,30 @@ export default async function FormPage({ params }: { params: { team: string; for
     return false
   })
 
-  // Get form data
-  const formData = await payload.find({
-    collection: 'forms',
-    where: {
-      id: { equals: awaitedParams.form },
-    },
-  })
+  const [formData, recipientRes] = await Promise.all([
+    // Get form data
+    payload.find({
+      collection: 'forms',
+      where: {
+        id: { equals: awaitedParams.form },
+      },
+    }),
+    // Find all recipients for the team
+    payload.find({
+      overrideAccess: false,
+      disableErrors: true,
+      collection: 'recipients',
+      user,
+      where: {
+        team: {
+          equals: awaitedParams.team,
+        },
+      },
+    }),
+  ])
 
   // Extract active recipients from form data
   const formRecipients = formData.docs[0].recipients || []
-
-  // Find all recipients for the team
-  const recipientRes = await payload.find({
-    overrideAccess: false,
-    disableErrors: true,
-    collection: 'recipients',
-    user,
-    where: {
-      team: {
-        equals: awaitedParams.team,
-      },
-    },
-  })
 
   // Compare the recipients with the form recipients
   // and set the active status accordingly
@@ -76,35 +84,38 @@ export default async function FormPage({ params }: { params: { team: string; for
 
   return (
     <div className="flex flex-col">
-      <div className="p-4 mt-4">
-        {!formData.docs.length ? (
-          'Form not found'
-        ) : (
-          <div className="flex flex-col gap-8">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-muted-foreground">
-                  Created on {formatDate(formData.docs[0].createdAt)}
-                </p>
-                <h1 className="text-4xl font-bold">{formData.docs[0].name}</h1>
-              </div>
-              <ElementLock locked={!isOwner}>
-                <FormDropdown teamId={awaitedParams.team} formId={awaitedParams.form} />
-              </ElementLock>
-            </div>
+      {!formData.docs.length ? (
+        'Form not found'
+      ) : (
+        <div className="flex flex-col gap-8">
+          <Link href="./" className="w-fit">
+            <Button variant="ghost">
+              <ChevronLeft /> back
+            </Button>
+          </Link>
+          <div className="flex items-center justify-between">
             <div>
-              <h3 className="font-semibold mb-2">Form ID</h3>
-              <p className="p-2 px-4 bg-muted rounded-md w-fit font-mono">{formData.docs[0].id}</p>
+              <p className="text-muted-foreground">
+                Created on {formatDate(formData.docs[0].createdAt)}
+              </p>
+              <h1 className="text-4xl font-bold">{formData.docs[0].name}</h1>
             </div>
-
-            <FormRecipientEditor
-              formId={awaitedParams.form}
-              teamId={awaitedParams.team}
-              recipients={recipients}
-            />
+            <ElementLock locked={!isOwner}>
+              <FormDropdown teamId={awaitedParams.team} formId={awaitedParams.form} />
+            </ElementLock>
           </div>
-        )}
-      </div>
+          <div>
+            <h3 className="font-semibold mb-2">Form ID</h3>
+            <p className="p-2 px-4 bg-muted rounded-md w-fit font-mono">{formData.docs[0].id}</p>
+          </div>
+
+          <FormRecipientEditor
+            formId={awaitedParams.form}
+            teamId={awaitedParams.team}
+            recipients={recipients}
+          />
+        </div>
+      )}
     </div>
   )
 }

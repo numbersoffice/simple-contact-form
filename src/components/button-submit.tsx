@@ -13,7 +13,7 @@ export default function SubmitButton({
   loading: boolean
   disabled?: boolean
   className?: string
-  [key: string]: any
+  [key: string]: unknown
 }) {
   return (
     <Button

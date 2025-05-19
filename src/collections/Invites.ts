@@ -1,5 +1,6 @@
 import type { CollectionConfig, PayloadRequest, Where } from 'payload'
 import { VerifiationTokenField } from './custom-fields/verification-token'
+import { AppUser } from '@/payload-types'
 
 export const Invites: CollectionConfig = {
   slug: 'invites',
@@ -212,7 +213,7 @@ export const Invites: CollectionConfig = {
 /////////////////////////////////////////////////////////////////////////
 // Access control
 /////////////////////////////////////////////////////////////////////////
-async function owner_bool({ req, data }: { req: PayloadRequest; data: any }) {
+async function owner_bool({ req, data }: { req: PayloadRequest; data: { team: string } }) {
   const { user } = req
 
   // Prevent unauthenticated access
@@ -234,7 +235,8 @@ async function owner_bool({ req, data }: { req: PayloadRequest; data: any }) {
   if (typeof teamRes !== 'object') return false
 
   // Check if user is owner
-  const isOwner = teamRes.owners?.some((owner: any) => {
+  const isOwner = teamRes.owners?.some((owner: string | AppUser) => {
+    if (typeof owner === 'string') return false
     return owner.id === user.id
   })
   if (!isOwner) return false

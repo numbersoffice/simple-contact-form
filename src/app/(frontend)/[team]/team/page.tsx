@@ -1,5 +1,4 @@
 import TableHeaderMembers from '@/components/table-header-members'
-import { HeaderPage } from '@/components/header-page'
 import TableGridMembers, { Form } from '@/components/table-grid-members'
 import payload from '@/lib/payload'
 import { getUser } from '@/lib/utils-server'
@@ -8,7 +7,7 @@ import { AppUser, Invite } from '@/payload-types'
 import LeaveTeam from './leave-team'
 import DeleteTeam from './delete-team'
 
-export default async function MembersPage({ params }: { params: { team: string } }) {
+export default async function MembersPage({ params }: { params: Promise<{ team: string }> }) {
   const awaitedParams = await params
 
   const user = await getUser()
@@ -99,18 +98,15 @@ export default async function MembersPage({ params }: { params: { team: string }
 
   return (
     <>
-      <HeaderPage title="Team" />
-      <div className="p-4 lg:px-6 flex flex-col gap-8">
-        <div>
-          <TableHeaderMembers teamName={teamRes.name} userRole={role} />
-          <TableGridMembers teamId={awaitedParams.team} data={data} userRole={role} />
-        </div>
-        <div>
-          {(canLeaveTeam || canDeleteTeam) && <h3 className="font-semibold mb-2">Settings</h3>}
-          <div className="flex flex-col gap-4">
-            {canLeaveTeam && <LeaveTeam />}
-            {canDeleteTeam && <DeleteTeam />}
-          </div>
+      <div className="mb-6">
+        <TableHeaderMembers teamName={teamRes.name} userRole={role} />
+        <TableGridMembers teamId={awaitedParams.team} data={data} userRole={role} />
+      </div>
+      <div>
+        {(canLeaveTeam || canDeleteTeam) && <h3 className="font-semibold mb-2">Settings</h3>}
+        <div className="flex flex-col gap-4">
+          {canLeaveTeam && <LeaveTeam />}
+          {canDeleteTeam && <DeleteTeam />}
         </div>
       </div>
     </>

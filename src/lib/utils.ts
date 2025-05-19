@@ -1,5 +1,6 @@
 import { clsx, type ClassValue } from 'clsx'
 import { twMerge } from 'tailwind-merge'
+import { randomBytes } from 'crypto'
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -38,4 +39,35 @@ export function formatDate(timestamp: string): string {
     // minute: '2-digit',
   }
   return date.toLocaleDateString('en-US', options)
+}
+
+/**
+ * A promise that will resolve after a predefined amount of time
+ * @param time A timeout in milliseconds
+ */
+export async function wait(time: number) {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve('Done waiting')
+    }, time)
+  })
+}
+
+/**
+ * Generate a Mongo‑style 24‑char hex ID
+ */
+export function generateId() {
+  // 12 random bytes  →  24 hex chars
+  const bytes = new Uint8Array(12)
+
+  if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+    crypto.getRandomValues(bytes) // Browser
+  } else {
+    // Node.js
+    const nodeBuf = randomBytes(12)
+    bytes.set(nodeBuf)
+  }
+
+  // Convert to hex and join
+  return Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('')
 }

@@ -1,5 +1,5 @@
-import { Form, Team } from '@/payload-types'
 import payload from '@/lib/payload'
+import { Team } from '@/payload-types'
 import Stripe from 'stripe'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
@@ -13,15 +13,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
  * @param team - Payload team object
  * @param charge - How much to charge (in cents)
  */
-export async function consumeBalance({
-  team,
-  form,
-  charge,
-}: {
-  team: Team
-  form: Form
-  charge: number
-}) {
+export async function consumeBalance({ team, charge }: { team: Team; charge: number }) {
   // Check if team has a balance
   if (team.balance === null || team.balance === undefined) {
     return { error: 'Balance field is not set up correctly.' }
@@ -79,7 +71,7 @@ export async function consumeBalance({
               text: `Your ${team.name} team has been successfully recharged. Your new balance is ${team.balance ? team.balance + 500 : 500} cents.`,
             })
         })
-      } catch (err) {
+      } catch (_err) {
         // Charge failed
         // Send email to team owners
         team.owners?.forEach((owner) => {

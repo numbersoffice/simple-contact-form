@@ -1,7 +1,6 @@
 import type { CollectionConfig, PayloadRequest } from 'payload'
-import { associatesOnly } from './utils/access'
 import { VerifiationTokenField } from './custom-fields/verification-token'
-import { Recipient } from '@/payload-types'
+import { associatesOnly } from './utils/access'
 
 export const Recipients: CollectionConfig = {
   slug: 'recipients',
@@ -30,6 +29,9 @@ export const Recipients: CollectionConfig = {
   ],
   access: {
     create: ({ req, data }) => {
+      // Check for admins
+      if (req.user?.collection === 'users') return true
+
       // Check for authorization
       if (!associatesOnly({ req })) return false
 
@@ -41,6 +43,9 @@ export const Recipients: CollectionConfig = {
     },
     read: associatesOnly,
     update: ({ req, data }) => {
+      // Check for admins
+      if (req.user?.collection === 'users') return true
+
       // Chec for authorization
       if (!associatesOnly({ req })) return false
 
@@ -67,6 +72,21 @@ export const Recipients: CollectionConfig = {
 
           // Skip if user is trying to add their own email
           if (user?.email === email) {
+            // Set the recipient to verified
+            await payload.update({
+              collection: 'recipients',
+              data: {
+                verified: true,
+              },
+              where: {
+                id: { equals: docId },
+              },
+            })
+            return
+          }
+
+          // Skip if has been added by admin
+          if (req.user?.collection === 'users') {
             // Set the recipient to verified
             await payload.update({
               collection: 'recipients',

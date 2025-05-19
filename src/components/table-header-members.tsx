@@ -65,7 +65,7 @@ export default function RecipientTableHeader({
       console.error('Error sending invite:', error)
       setLoading(false)
 
-      error.errors.forEach((e: any) => toast.error('Error: ' + e.message))
+      error.errors.forEach((e: Error) => toast.error('Error: ' + e.message))
     }
   }
 

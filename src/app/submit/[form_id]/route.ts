@@ -7,15 +7,30 @@ import {
   successResponse,
 } from '@/functions/request'
 import isSpam from '@/functions/spam'
-import { checkPaymentMethod } from '@/functions/stripe'
 import payload from '@/lib/payload'
 import { Recipient } from '@/payload-types'
-import { NextRequest } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 
 const honeypots = ['are_you_human']
 
-export async function POST(request: NextRequest, { params }: { params: { form_id: string } }) {
-  params = await params
+export async function POST(
+  request: NextRequest,
+  { params }: { params: Promise<{ form_id: string }> },
+) {
+  const awaitedParams = await params
+
+  // CORS headers
+  const corsHeaders = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    // 'Access-Control-Allow-Headers': 'Content-Type',
+  }
+
+  // Handle preflight OPTIONS request
+  if (request.method === 'OPTIONS') {
+    return new NextResponse(null, { status: 204, headers: corsHeaders })
+  }
+
   const host = request.headers.get('host')
   const protocol = request.headers.get('x-forwarded-proto') || 'http'
   const origin = request.headers.get('origin')
@@ -25,7 +40,7 @@ export async function POST(request: NextRequest, { params }: { params: { form_id
   console.log(`${isHtmlForm ? 'Html' : 'Programmatic'} form submission received.`)
 
   // Verify required query parameters
-  const queryRes = checkQueryParams(params, ['form_id'])
+  const queryRes = checkQueryParams(awaitedParams, ['form_id'])
   if (!queryRes.success) return customResponse(400, { message: queryRes.message, success: false })
 
   // Get form fields
@@ -74,7 +89,7 @@ export async function POST(request: NextRequest, { params }: { params: { form_id
   // Due diligence
   const formRes = await payload.findByID({
     collection: 'forms',
-    id: params.form_id,
+    id: awaitedParams.form_id,
   })
 
   // Check if form exists
@@ -102,7 +117,7 @@ export async function POST(request: NextRequest, { params }: { params: { form_id
     })
 
   // Charge team for form submission
-  const chargeRes = await consumeBalance({ team, form: formRes, charge: 1 })
+  const chargeRes = await consumeBalance({ team, charge: 1 })
 
   if (chargeRes.error) {
     return customResponse(500, {
@@ -165,9 +180,11 @@ export async function POST(request: NextRequest, { params }: { params: { form_id
   //   dynamicTemplateData: { fields: finalFields },
   // })
 
-  return successResponse(
-    isHtmlForm,
-    redirect,
-    `Triggered email submission(s). [${/*mailRes[0].statusCode*/ 202}]`,
-  )
+  // Example of adding CORS headers to a response
+  const response = successResponse(isHtmlForm, redirect, `Form submitted. TeamId: ${team.id}`)
+  Object.entries(corsHeaders).forEach(([key, value]) => {
+    response.headers.set(key, value)
+  })
+
+  return response
 }

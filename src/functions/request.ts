@@ -32,7 +32,7 @@ export function removeUtilityFields(
  * @param params - Params object provided by the request
  * @param requiredParams - Array of required parameters
  */
-export function checkQueryParams(params: any, requiredParams: string[]) {
+export function checkQueryParams(params: Record<string, unknown>, requiredParams: string[]) {
   for (const param of requiredParams) {
     if (!params[param]) {
       return { success: false, message: `Missing parameter: ${param}` }

@@ -4,11 +4,7 @@ import { Elements } from '@stripe/react-stripe-js'
 import { loadStripe } from '@stripe/stripe-js'
 import { createContext, useContext, useState } from 'react'
 
-interface SetupIntentContextValue {
-  // clientSecret: string | null
-}
-
-const SetupIntentContext = createContext<SetupIntentContextValue | undefined>(undefined)
+const SetupIntentContext = createContext<unknown | undefined>(undefined)
 
 // Custom hook to access the setup intent context
 export function useSetupIntent() {
@@ -19,13 +15,7 @@ export function useSetupIntent() {
   return context
 }
 
-export default function StripeElementsProvider({
-  children,
-  email,
-}: {
-  children: React.ReactNode
-  email: string
-}) {
+export default function StripeElementsProvider({ children }: { children: React.ReactNode }) {
   const [stripePromise] = useState(loadStripe(process.env.NEXT_PUBLIC_STRIPE_KEY!))
 
   return <Elements stripe={stripePromise}>{children}</Elements>

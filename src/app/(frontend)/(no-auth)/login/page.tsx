@@ -6,11 +6,11 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import React, { useRef, useState } from 'react'
+import React, { Suspense, useRef, useState } from 'react'
 
 export default function LoginPage() {
-  const searchParams = useSearchParams()
-  const email = searchParams.get('email')
+  // const searchParams = useSearchParams()
+  // const email = searchParams.get('email')
 
   const router = useRouter()
   const formRef = useRef(null)
@@ -31,7 +31,7 @@ export default function LoginPage() {
     try {
       // Submit the form data using the fetch API.
       // Note: When using FormData, content type is automatically set
-      const response = await fetch('/api/register', {
+      const response = await fetch('/api/login', {
         method: 'POST',
         body: formData,
       })
@@ -41,6 +41,7 @@ export default function LoginPage() {
         // Log error messages if response is not ok
         const data = await response.json()
         setError(data.error)
+        setLoading(false)
         return
       }
 
@@ -48,7 +49,7 @@ export default function LoginPage() {
       const data = await response.json()
 
       // Redirect to the forms page on successful registration
-      router.push(`${data.redirect}${data.email ? `?email=${data.email}` : ''}`)
+      router.push(data.redirect)
     } catch (error) {
       // Catch any network or unexpected errors
       console.error('Fetch error:', error)
@@ -60,34 +61,21 @@ export default function LoginPage() {
     <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
       <div className="w-full max-w-sm">
         <div className="flex flex-col gap-6">
-          {email && (
-            <Card className="bg-blue-500 text-white">
-              <CardHeader>
-                <CardTitle className="text-2xl">New invite</CardTitle>
-                <CardDescription className="text-white">
-                  Log in using <strong>{email}</strong> to accept or decline your team invite.
-                </CardDescription>
-              </CardHeader>
-            </Card>
-          )}
+          <Suspense>
+            <NewInviteCard />
+          </Suspense>
+
           <Card>
             <CardHeader>
-              <CardTitle className="text-2xl">Create Account</CardTitle>
-              <CardDescription>Enter your email below to create an account</CardDescription>
+              <CardTitle className="text-2xl">Login</CardTitle>
+              <CardDescription>Enter your email below to login to your account</CardDescription>
             </CardHeader>
             <CardContent>
               <form ref={formRef} onSubmit={handleSubmit}>
                 <div className="flex flex-col gap-6">
                   <div className="grid gap-2">
                     <Label htmlFor="email">Email</Label>
-                    <Input
-                      defaultValue={email || ''}
-                      onChange={() => setError(undefined)}
-                      name="email"
-                      type="email"
-                      placeholder="m@example.com"
-                      required
-                    />
+                    <Input name="email" type="email" placeholder="m@example.com" required />
                     {error?.email && (
                       <Label htmlFor="email" className="text-red-400 font-normal">
                         {error.email.join(', ')}
@@ -95,13 +83,16 @@ export default function LoginPage() {
                     )}
                   </div>
                   <div className="grid gap-2">
-                    <Label htmlFor="password">Password</Label>
-                    <Input
-                      onChange={() => setError(undefined)}
-                      name="password"
-                      type="password"
-                      required
-                    />
+                    <div className="flex items-center">
+                      <Label htmlFor="password">Password</Label>
+                      <Link
+                        href="/forgot-password"
+                        className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
+                      >
+                        Forgot your password?
+                      </Link>
+                    </div>
+                    <Input name="password" type="password" required />
                     {error?.password && (
                       <Label htmlFor="password" className="text-red-400 font-normal">
                         {error.password.join(', ')}
@@ -109,13 +100,13 @@ export default function LoginPage() {
                     )}
                   </div>
                   <SubmitButton loading={loading} className="mt-4 w-full">
-                    Create Account
+                    Login
                   </SubmitButton>
                 </div>
                 <div className="mt-4 text-center text-sm">
-                  Already have an account?{' '}
-                  <Link href="/login" className="underline underline-offset-4">
-                    Login
+                  Don&apos;t have an account?{' '}
+                  <Link href="/register" className="underline underline-offset-4">
+                    Sign up
                   </Link>
                 </div>
               </form>
@@ -124,5 +115,23 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+function NewInviteCard() {
+  const searchParams = useSearchParams()
+  const email = searchParams.get('email')
+
+  if (!email) return null
+
+  return (
+    <Card className="bg-blue-500 text-white">
+      <CardHeader>
+        <CardTitle className="text-2xl">New invite</CardTitle>
+        <CardDescription className="text-white">
+          Create an account using <strong>{email}</strong> to accept or decline your team invite.
+        </CardDescription>
+      </CardHeader>
+    </Card>
   )
 }

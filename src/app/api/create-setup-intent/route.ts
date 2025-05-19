@@ -24,11 +24,6 @@ export async function POST(req: NextRequest) {
     const setupIntent = await stripe.setupIntents.create({
       customer: stripeCustomerId,
       payment_method_types: ['card'],
-      metadata: {
-        email: data.email,
-        user: data.user,
-        team: data.team,
-      },
     })
 
     if (!setupIntent.client_secret) {

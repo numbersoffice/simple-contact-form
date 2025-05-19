@@ -22,7 +22,7 @@ export type Form = {
   self: boolean
 }
 
-interface DataTableProps<TData extends { id: string; status: 'Pending' | 'Verified' }, TValue> {
+interface DataTableProps<TData extends { id: string; status: 'Pending' | 'Verified' }, _TValue> {
   data: TData[]
   teamId: string
   userRole: string

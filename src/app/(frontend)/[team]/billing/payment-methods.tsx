@@ -24,7 +24,7 @@ export default function PaymentMethods({ data, user }: { data: PaymentMethod[]; 
   const hasPaymentMethods = data.length > 0
 
   return (
-    <StripeElementsProvider email={user.email}>
+    <StripeElementsProvider>
       <Card>
         <CardHeader>
           <CardTitle>Saved Payment Method</CardTitle>
@@ -76,7 +76,10 @@ export default function PaymentMethods({ data, user }: { data: PaymentMethod[]; 
                 <DialogTitle>
                   {hasPaymentMethods ? 'Update payment method' : 'Add payment method'}
                 </DialogTitle>
-                <DialogDescription>Please enter your card information.</DialogDescription>
+                <DialogDescription>
+                  Add a payment method for future payments or to automatically recharge your
+                  balance.
+                </DialogDescription>
               </DialogHeader>
               <PaymentMethodForm
                 user={user}

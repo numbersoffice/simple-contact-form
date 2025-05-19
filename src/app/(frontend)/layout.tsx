@@ -4,8 +4,8 @@ import '@/styles/globals.css'
 import { Toaster } from 'sonner'
 
 export const metadata = {
-  description: 'A blank template using Payload in a Next.js app.',
-  title: 'Payload Blank Template',
+  // description: 'A blank template using Payload in a Next.js app.',
+  title: 'Simple Contact Form',
 }
 
 export default async function RootLayout(props: { children: React.ReactNode }) {

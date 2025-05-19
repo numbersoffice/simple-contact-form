@@ -4,10 +4,11 @@ import { headers as NextHeaders } from 'next/headers'
 import payload from '@/lib/payload'
 import { ExtendedTeam } from '@/components/app-sidebar'
 import { AppDataProvider } from '@/context/app-data'
+import { redirect } from 'next/navigation'
 
 export default async function Layout(props: {
   children: React.ReactNode
-  params: { team: string }
+  params: Promise<{ team: string }>
 }) {
   const { team } = await props.params
 
@@ -15,7 +16,7 @@ export default async function Layout(props: {
   const headers = await NextHeaders()
   const authResult = await payload.auth({ headers })
   const user = authResult.user
-  if (user?.collection !== 'app-users') return null
+  if (user?.collection !== 'app-users') redirect('/login')
 
   // Get users teams
   const { docs } = await payload.find({
@@ -81,12 +82,7 @@ export default async function Layout(props: {
 
   return (
     <AppDataProvider team={currentTeam} appUser={appUser} userRole={userRole}>
-      <Dashboard
-        user={user}
-        teams={teams}
-        activeTeamId={team || teams[0].id}
-        invites={invites.docs}
-      >
+      <Dashboard teams={teams} activeTeamId={team || teams[0].id} invites={invites.docs}>
         {props.children}
       </Dashboard>
     </AppDataProvider>

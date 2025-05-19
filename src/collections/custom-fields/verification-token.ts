@@ -14,7 +14,7 @@ export const VerifiationTokenField: Field = {
   hooks: {
     beforeChange: [
       // Generate a verification token before creating the document
-      ({ value, operation }: any) => {
+      ({ value, operation }) => {
         if (operation === 'create') {
           // Generate a random token
           const token =

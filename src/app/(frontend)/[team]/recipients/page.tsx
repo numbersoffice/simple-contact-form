@@ -1,11 +1,10 @@
 import TableHeaderRecipients from '@/components/table-header-recipients'
-import { HeaderPage } from '@/components/header-page'
 import TableGridRecipients, { Form } from '@/components/table-grid-recipients'
 import payload from '@/lib/payload'
 import { getUser } from '@/lib/utils-server'
 import { redirect } from 'next/navigation'
 
-export default async function FormsPage({ params }: { params: { team: string } }) {
+export default async function FormsPage({ params }: { params: Promise<{ team: string }> }) {
   const awaitedParams = await params
 
   const user = await getUser()
@@ -34,11 +33,8 @@ export default async function FormsPage({ params }: { params: { team: string } }
 
   return (
     <>
-      <HeaderPage title="Recipients" />
-      <div className="p-4 lg:px-6">
-        <TableHeaderRecipients />
-        <TableGridRecipients data={data} />
-      </div>
+      <TableHeaderRecipients />
+      <TableGridRecipients data={data} />
     </>
   )
 }

@@ -12,12 +12,13 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/components/ui/sidebar'
-import { AppUser, Invite, Team } from '@/payload-types'
-import { FileText, LogOut, MailCheck, Settings, Users, Wallet } from 'lucide-react'
-import { usePathname, useRouter } from 'next/navigation'
-import { TeamSwitcher } from './team-switcher'
 import { useAppData } from '@/context/app-data'
+import { Invite, Team } from '@/payload-types'
+import { LogOut, LucideProps } from 'lucide-react'
+import { usePathname, useRouter } from 'next/navigation'
 import ElementLock from './element-lock'
+import { TeamSwitcher } from './team-switcher'
+import { ForwardRefExoticComponent, RefAttributes } from 'react'
 
 // Properly extend team type
 export interface ExtendedTeam extends Team {
@@ -25,48 +26,26 @@ export interface ExtendedTeam extends Team {
 }
 
 export function AppSidebar({
-  user,
   teams,
   activeTeamId,
   invites,
+  data,
 }: {
-  user: AppUser
   teams: ExtendedTeam[]
   activeTeamId: string
   invites: Invite[]
+  data: {
+    nav: {
+      title: string
+      url: string
+      icon: ForwardRefExoticComponent<Omit<LucideProps, 'ref'> & RefAttributes<SVGSVGElement>>
+      ownerOnly: boolean
+    }[]
+  }
 }) {
   const router = useRouter()
   const pathname = usePathname()
   const { userRole } = useAppData()
-
-  const data = {
-    nav: [
-      {
-        title: 'Forms',
-        url: `/${activeTeamId}/forms`,
-        icon: FileText,
-        ownerOnly: false,
-      },
-      {
-        title: 'Recipients',
-        url: `/${activeTeamId}/recipients`,
-        icon: MailCheck,
-        ownerOnly: false,
-      },
-      {
-        title: 'Team',
-        url: `/${activeTeamId}/team`,
-        icon: Users,
-        ownerOnly: false,
-      },
-      {
-        title: 'Credits',
-        url: `/${activeTeamId}/billing`,
-        icon: Wallet,
-        ownerOnly: true,
-      },
-    ],
-  }
 
   // Logout function
   // This function is called when the user clicks the logout button
@@ -76,6 +55,7 @@ export function AppSidebar({
       await fetch(`${process.env.NEXT_PUBLIC_HOST_URL}/api/app-users/logout`, {
         method: 'POST',
         credentials: 'include',
+        mode: 'no-cors',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -87,17 +67,10 @@ export function AppSidebar({
     }
   }
 
-  const activeTeamName = teams.find((team) => team.id === activeTeamId)?.name
-
   return (
-    <Sidebar collapsible="icon">
+    <Sidebar>
       <SidebarHeader>
-        <TeamSwitcher
-          teams={teams}
-          invites={invites}
-          activeTeamId={activeTeamId}
-          activeTeamName={activeTeamName || ''}
-        />
+        <TeamSwitcher teams={teams} invites={invites} activeTeamId={activeTeamId} />
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>

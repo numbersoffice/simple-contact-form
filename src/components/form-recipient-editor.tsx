@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+// import { useState } from 'react'
 import { Badge } from './ui/badge'
 
 export default function FormRecipientEditor({
@@ -15,7 +15,7 @@ export default function FormRecipientEditor({
   teamId: string
 }) {
   const router = useRouter()
-  const [isUpdating, setIsUpdating] = useState(false)
+  // const [isUpdating, setIsUpdating] = useState(false)
 
   async function handleChange(recipientId: string) {
     // Handle recipient change logic here
@@ -30,7 +30,7 @@ export default function FormRecipientEditor({
       // Create array with ids of active recipients
       const activeRecipients = recipients.filter((r) => r.active).map((r) => r.id)
 
-      setIsUpdating(true)
+      // setIsUpdating(true)
 
       // Update the form with the new active recipients
       const res = await fetch(`/api/forms/${formId}`, {
@@ -46,7 +46,7 @@ export default function FormRecipientEditor({
         router.refresh()
       }
 
-      setIsUpdating(false)
+      // setIsUpdating(false)
     }
   }
   return (

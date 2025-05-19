@@ -1,7 +1,7 @@
 'use client'
 
 import { useAppData } from '@/context/app-data'
-import { CardElement, useElements, useStripe } from '@stripe/react-stripe-js'
+import { AddressElement, CardElement, useElements, useStripe } from '@stripe/react-stripe-js'
 import { CreditCard, LoaderCircle } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
@@ -41,6 +41,9 @@ export default function PaymentForm({
   const [amountInput, setAmountInput] = useState('')
   const [cardComplete, setCardComplete] = useState(false)
   const [savePaymentMethod, setSavePaymentMethod] = useState(false)
+  const [addressComplete, setAddressComplete] = useState(false)
+
+  const [addAddress, setAddAddress] = useState(false)
 
   const hasPaymentMethod = paymentMethods.length > 0
 
@@ -71,6 +74,10 @@ export default function PaymentForm({
     const futureUse = futureUseString === 'on' // convert to boolean
     const autoRecharge = autoRechargeString === 'on' // convert to boolean
 
+    // Retrieve address info from Stripe Elements
+    const addressElement = elements.getElement(AddressElement)
+    const addressData = addressElement && (await addressElement.getValue())
+
     // Get payment intent client secret
     const paymentIntentRes = await fetch('/api/create-payment-intent', {
       method: 'POST',
@@ -81,6 +88,7 @@ export default function PaymentForm({
         team: activeTeam.id,
         futureUse,
         autoRecharge,
+        address: addressData ? addressData : null,
       }),
     })
     const { clientSecret, error } = await paymentIntentRes.json()
@@ -118,6 +126,7 @@ export default function PaymentForm({
         setLoading(false)
         return
       }
+
       // Use new card
       const oneTimePaymentRes = await stripe.confirmCardPayment(clientSecret, {
         payment_method: {
@@ -169,27 +178,61 @@ export default function PaymentForm({
         {hasPaymentMethod ? 'Using saved card' : 'Card information'}
       </Label>
       {!hasPaymentMethod && (
-        <CardElement
-          id="card-element"
-          className={`border-input w-full min-w-0 rounded-md border px-3 py-[12px] text-base shadow-xs duration-300 ${ready ? 'opacity-100 height-fit' : 'opacity-0 height-0'}`}
-          onReady={() => setReady(true)}
-          onChange={(event) => {
-            if (event.error) setErrorMessage(event.error.message)
-            else setErrorMessage(null)
-            // Track whether the user has fully completed the card form
-            setCardComplete(event.complete)
-          }}
-        />
+        <>
+          <CardElement
+            id="card-element"
+            className="mb-3 border-input w-full min-w-0 rounded-md border px-3 py-[12px] text-base shadow-xs duration-300"
+            onReady={() => setReady(true)}
+            onChange={(event) => {
+              if (event.error) setErrorMessage(event.error.message)
+              else setErrorMessage(null)
+              // Track whether the user has fully completed the card form
+              setCardComplete(event.complete)
+            }}
+            options={{
+              disableLink: true,
+            }}
+          />
+        </>
       )}
 
       {!hasPaymentMethod && errorMessage && (
-        <p className="text-red-400 text-sm mt-2 p-2 px-4 bg-red-100 rounded-md border-red-400 border-[1px]">
+        <p className="text-red-400 text-sm mb-2 p-2 px-4 bg-red-100 rounded-md border-red-400 border-[1px]">
           {errorMessage}
         </p>
       )}
 
       {!hasPaymentMethod && (
-        <div className="flex items-center space-x-2 mt-6">
+        <div className="flex items-center space-x-2 mt-2 mb-2">
+          <Checkbox
+            checked={addAddress}
+            onCheckedChange={(checked) => setAddAddress(checked === true)}
+            name="billing-address"
+            id="billing-address"
+          />
+          <label htmlFor="billing-address" className="text-sm leading-none">
+            Add billing address for receipts
+          </label>
+        </div>
+      )}
+
+      {!hasPaymentMethod && (
+        <div
+          className={`${addAddress ? 'opacity-100 h-auto pt-4 pb-8' : 'opacity-0 h-0 overflow-hidden'}`}
+        >
+          <AddressElement
+            id="address-element"
+            options={{ mode: 'billing', autocomplete: { mode: 'disabled' } }}
+            onChange={(event) => {
+              // Track whether the user has fully completed the address form
+              setAddressComplete(event.complete)
+            }}
+          />
+        </div>
+      )}
+
+      {!hasPaymentMethod && (
+        <div className="flex items-center space-x-2 mb-2">
           <Checkbox
             checked={savePaymentMethod}
             onCheckedChange={(checked) => setSavePaymentMethod(checked === true)}
@@ -203,7 +246,7 @@ export default function PaymentForm({
       )}
 
       {!hasPaymentMethod && savePaymentMethod && (
-        <div className="mt-6 flex space-x-2">
+        <div className="flex space-x-2 mb-2">
           <Checkbox name="auto-recharge" id="auto-recharge" />
           <label htmlFor="auto-recharge" className="text-sm flex flex-col gap-1">
             Enable Auto recharge
@@ -254,7 +297,7 @@ export default function PaymentForm({
       {hasPaymentMethod ? (
         <Button
           type="submit"
-          className="mt-6"
+          className="mt-4"
           disabled={!elements || !stripe || loading || !isValidAmount(amountInput)}
         >
           {loading ? <LoaderCircle className="w-5 h-5 mr-2 animate-spin" /> : 'Purchase'}
@@ -267,10 +310,11 @@ export default function PaymentForm({
             !stripe ||
             !elements ||
             !isValidAmount(amountInput) ||
-            !cardComplete
+            !cardComplete ||
+            (addAddress && !addressComplete)
           }
           type="submit"
-          className="mt-6"
+          className="mt-4"
         >
           {loading ? <LoaderCircle className="w-5 h-5 mr-2 animate-spin" /> : 'Purchase'}
         </Button>

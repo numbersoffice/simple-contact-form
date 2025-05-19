@@ -2,7 +2,9 @@ import { createHighlighter } from 'shiki'
 import { bundledLanguages } from 'shiki/bundle/web'
 
 // Singleton highlighter instance
-let highlighterPromise: Promise<any> | null = null
+import type { Highlighter } from 'shiki'
+
+let highlighterPromise: Promise<Highlighter> | null = null
 
 async function getSingletonHighlighter() {
   if (!highlighterPromise) {

@@ -33,6 +33,7 @@ export async function POST(req: NextRequest) {
         futureUse,
         // Make sure auto recharge is only set to true if future use is also true
         autoRecharge: data.autoRecharge && futureUse ? 'true' : 'false',
+        address: data.address ? JSON.stringify(data.address) : null,
       },
       payment_method_types: ['card'],
       setup_future_usage: data.futureUse ? 'off_session' : undefined,
