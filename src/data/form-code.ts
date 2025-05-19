@@ -43,3 +43,40 @@ export function reactForm(url: string) {
   );
 }`
 }
+
+export function goForm(url: string) {
+  return `package main
+
+import (
+    "bytes"
+    "fmt"
+    "io"
+    "mime/multipart"
+    "net/http"
+)
+
+func main() {
+    var buf bytes.Buffer
+    writer := multipart.NewWriter(&buf)
+
+    // Add form fields
+    writer.WriteField("Email", "Test@test.com")
+    writer.WriteField("Message", "Hello world!")
+
+    writer.Close()
+
+    req, err := http.NewRequest("POST", "${url}", &buf)
+    if err != nil {
+        panic(err)
+    }
+    req.Header.Set("Content-Type", writer.FormDataContentType())
+
+    resp, err := http.DefaultClient.Do(req)
+    if err != nil {
+        panic(err)
+    }
+    defer resp.Body.Close()
+    body, _ := io.ReadAll(resp.Body)
+    fmt.Println(string(body))
+}`
+}

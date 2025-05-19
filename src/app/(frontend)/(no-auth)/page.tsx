@@ -1,12 +1,12 @@
 import { ArrowRight } from 'lucide-react'
-import { React, Html, GitHub } from '@/components/icons'
+import { React, Html, GitHub, Go } from '@/components/icons'
 
 import '../styles.css'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import Code from '@/components/code'
-import { htmlForm, reactForm } from '@/data/form-code'
+import { htmlForm, reactForm, goForm } from '@/data/form-code'
 
 const demoSubmissionUrl = `${process.env.NEXT_PUBLIC_HOST_URL}/submit/YOUR_FORM_ID`
 
@@ -56,12 +56,19 @@ export default async function HomePage() {
               <React className="mr-1" />
               React
             </TabsTrigger>
+            <TabsTrigger value="go" className="cursor-pointer">
+              <Go className="mr-1" />
+              Golang
+            </TabsTrigger>
           </TabsList>
           <TabsContent value="html">
             <Code code={htmlForm(demoSubmissionUrl)} language="html" />
           </TabsContent>
           <TabsContent value="react">
             <Code code={reactForm(demoSubmissionUrl)} language="jsx" />
+          </TabsContent>
+          <TabsContent value="go">
+            <Code code={goForm(demoSubmissionUrl)} language="go" />
           </TabsContent>
         </Tabs>
         <div className="w-full max-w-[800px] mb-2 p-4">
