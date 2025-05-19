@@ -1,4 +1,4 @@
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import { Tooltip, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import '@/styles/globals.css'
 import { Inbox } from 'lucide-react'
 import Image from 'next/image'
@@ -18,9 +18,9 @@ export default async function Layout({ children }: { children: React.ReactNode }
                   className={`h-[16px] w-[16px] rounded ${true ? 'bg-green-500' : 'bg-red-500'}`}
                 ></div>
               </TooltipTrigger>
-              <TooltipContent>
+              {/* <TooltipContent>
                 <p>System Status - Online</p>
-              </TooltipContent>
+              </TooltipContent> */}
             </Tooltip>
           </TooltipProvider>
         </nav>

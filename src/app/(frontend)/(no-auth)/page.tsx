@@ -1,5 +1,5 @@
 import { ArrowRight } from 'lucide-react'
-import { React, Html } from '@/components/icons'
+import { React, Html, GitHub } from '@/components/icons'
 
 import '../styles.css'
 import { Button } from '@/components/ui/button'
@@ -14,10 +14,23 @@ export default async function HomePage() {
   return (
     <div>
       <section className="min-h-[85vh] flex flex-col items-center justify-center py-24 px-6 gap-6">
-        <h1 className="text-5xl md:text-7xl max-w-[550px] text-center mx-auto font-bold">
-          Simple <br />
-          Contact Form
-        </h1>
+        <div className="relative flex flex-col items-center gap-8">
+          <a
+            href="https://github.com/maxibenner/simple-contact-form"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs px-3 py-1 rounded-full flex items-center gap-1 border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50"
+            style={{ textDecoration: 'none' }}
+            aria-label="View source on GitHub"
+          >
+            <GitHub className="mr-1" />
+            View on GitHub
+          </a>
+          <h1 className="text-5xl md:text-7xl max-w-[550px] text-center mx-auto font-bold">
+            Simple <br />
+            Contact Form
+          </h1>
+        </div>
         <p className="text-xl text-gray-600 max-w-[550px] mx-auto text-center">
           Spam protected form submissions directly to your email inbox. No backend setup required.
           Only pay for what you use.
