@@ -149,7 +149,9 @@ export default function PaymentMethodForm({
         </label>
       </div>
 
-      <div className={`mt-4 ${addAddress ? 'opacity-100 h-auto pb-4 pt-2' : 'opacity-0 h-0'}`}>
+      <div
+        className={`mt-4 ${addAddress ? 'opacity-100 h-auto pb-4 pt-2' : 'opacity-0 h-0 overflow-hidden'}`}
+      >
         {/* <Label htmlFor="address-element" className="mb-4 mt-4">
           Address
         </Label> */}
@@ -165,7 +167,7 @@ export default function PaymentMethodForm({
 
       <Button
         disabled={
-          // Check if statusis loading
+          // Check if status is loading
           loading ||
           // Check if stripe and elements are loaded
           !ready ||
