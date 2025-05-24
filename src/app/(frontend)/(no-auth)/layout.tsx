@@ -7,10 +7,12 @@ import Link from 'next/link'
 export default async function Layout({ children }: { children: React.ReactNode }) {
   return (
     <>
-      <Link href="/">
-        <nav className="absolute top-0 left-1/2 -translate-x-1/2 flex space-x-2 items-center py-6 px-6 w-full max-w-[1200px] mx-auto">
-          <Inbox size={28} />
-          <h1 className="text-2xl font-semibold">SCF</h1>
+      <nav className="absolute top-0 left-1/2 -translate-x-1/2 flex items-center justify-between py-6 px-6 w-full max-w-[1200px] mx-auto">
+        <div className="flex items-center space-x-2">
+          <Link href="/" className="flex items-center space-x-2">
+            <Inbox size={28} />
+            <h1 className="text-2xl font-semibold">SCF</h1>
+          </Link>
           <TooltipProvider delayDuration={300}>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -19,12 +21,17 @@ export default async function Layout({ children }: { children: React.ReactNode }
                 ></div>
               </TooltipTrigger>
               {/* <TooltipContent>
-                <p>System Status - Online</p>
-              </TooltipContent> */}
+                  <p>System Status - Online</p>
+                </TooltipContent> */}
             </Tooltip>
           </TooltipProvider>
-        </nav>
-      </Link>
+        </div>
+        <div className="flex items-center space-x-4">
+          <Link href="/roadmap" className="text-sm text-gray-700 hover:underline">
+            Roadmap
+          </Link>
+        </div>
+      </nav>
 
       {children}
 
