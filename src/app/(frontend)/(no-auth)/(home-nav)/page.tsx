@@ -1,19 +1,21 @@
 import { ArrowRight } from 'lucide-react'
 import { React, Html, GitHub, Go } from '@/components/icons'
 
-import '../styles.css'
+import '../../styles.css'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import Code from '@/components/code'
 import { htmlForm, reactForm, goForm } from '@/data/form-code'
 import Image from 'next/image'
+import Navbar from '@/components/navbar'
 
 const demoSubmissionUrl = `${process.env.NEXT_PUBLIC_HOST_URL}/submit/YOUR_FORM_ID`
 
 export default async function HomePage() {
   return (
     <div>
+      <Navbar withLogo={false} />
       <section className="min-h-[85vh] flex flex-col items-center justify-center py-24 px-6 gap-6">
         <div className="relative flex flex-col items-center gap-8">
           <a
@@ -31,7 +33,13 @@ export default async function HomePage() {
             Simple <br />
             Contact Form
           </h1> */}
-          <Image src="/images/scf_title.jpg" width={400} height={200} alt="Simple Contact Form" />
+          <Image
+            src="/images/scf_title.jpg"
+            width={400}
+            height={270}
+            alt="Simple Contact Form"
+            // className="w-full max-w-[400px]"
+          />
         </div>
         <p className="text-xl text-gray-600 max-w-[550px] mx-auto text-center">
           Spam protected form submissions directly to your email inbox. No backend setup required.

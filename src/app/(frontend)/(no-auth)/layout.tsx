@@ -2,13 +2,10 @@ import '@/styles/globals.css'
 
 import Image from 'next/image'
 import Link from 'next/link'
-import Navbar from '@/components/navbar'
 
 export default async function Layout({ children }: { children: React.ReactNode }) {
   return (
     <>
-      <Navbar />
-
       {children}
 
       <footer className="border-t p-12 flex flex-col gap-8">
