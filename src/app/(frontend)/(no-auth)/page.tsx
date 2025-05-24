@@ -7,6 +7,7 @@ import Link from 'next/link'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import Code from '@/components/code'
 import { htmlForm, reactForm, goForm } from '@/data/form-code'
+import Image from 'next/image'
 
 const demoSubmissionUrl = `${process.env.NEXT_PUBLIC_HOST_URL}/submit/YOUR_FORM_ID`
 
@@ -26,10 +27,11 @@ export default async function HomePage() {
             <GitHub className="mr-1" />
             View on GitHub
           </a>
-          <h1 className="text-5xl md:text-7xl max-w-[550px] text-center mx-auto font-bold">
+          {/* <h1 className="text-5xl md:text-7xl max-w-[550px] text-center mx-auto font-bold">
             Simple <br />
             Contact Form
-          </h1>
+          </h1> */}
+          <Image src="/images/scf_title.jpg" width={400} height={200} alt="Simple Contact Form" />
         </div>
         <p className="text-xl text-gray-600 max-w-[550px] mx-auto text-center">
           Spam protected form submissions directly to your email inbox. No backend setup required.
@@ -46,7 +48,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="flex flex-col items-center pb-48 px-6">
+      <section className="flex flex-col items-center pb-24 md:pb-48 px-6">
         <Tabs defaultValue="html" className="w-full max-w-[800px]">
           <TabsList>
             <TabsTrigger value="html" className="cursor-pointer">
