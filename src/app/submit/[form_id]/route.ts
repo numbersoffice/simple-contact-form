@@ -6,7 +6,7 @@ import {
   removeUtilityFields,
   successResponse,
 } from '@/functions/request'
-// import isSpam from '@/functions/spam'
+import isSpam from '@/functions/spam'
 import payload from '@/lib/payload'
 import { Recipient } from '@/payload-types'
 import { NextRequest, NextResponse } from 'next/server'
@@ -72,7 +72,7 @@ export async function POST(
   const finalFields = removeUtilityFields(fields, ['redirect', ...honeypots])
 
   // SPAM FILTER
-  const spam = false //await isSpam(finalFields)
+  const spam = await isSpam(finalFields)
 
   if (spam) {
     // Log spam
