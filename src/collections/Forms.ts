@@ -45,7 +45,7 @@ export const Forms: CollectionConfig = {
   ],
   access: {
     create: associatesOnly,
-    read: () => true, //associatesOnly,
+    read: associatesOnly,
     update: associatesOnly,
     delete: ownersOnly,
   },
