@@ -56,6 +56,5 @@ npm run dev
 [MIT](LICENSE)
 
 ## Images
-![landing page with large, red lettering spelling "simple contact form"](/public/readme/screenshot_1.jpg)
-![form management screen exposing the form id](/public/readme/screenshot_2.jpg)
-![billing dashboard with payment management options](/public/readme/screenshot_3.jpg)
+![form management screen exposing the form id](/repo_assets/screenshot_2.jpg)
+![billing dashboard with payment management options](/repo_assets/screenshot_3.jpg)
