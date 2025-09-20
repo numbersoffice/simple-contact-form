@@ -49,14 +49,16 @@ export default async function FormPage({
     // Get form data
     payload.find({
       collection: 'forms',
+      overrideAccess: false,
+      user,
       where: {
-        id: { equals: awaitedParams.form },
+        formId: { equals: awaitedParams.form },
       },
+      limit: 1,
     }),
     // Find all recipients for the team
     payload.find({
       overrideAccess: false,
-      disableErrors: true,
       collection: 'recipients',
       user,
       where: {
@@ -66,6 +68,7 @@ export default async function FormPage({
       },
     }),
   ])
+  console.log(formData.docs)
 
   // Extract active recipients from form data
   const formRecipients = formData.docs[0].recipients || []
@@ -84,7 +87,7 @@ export default async function FormPage({
 
   return (
     <div className="flex flex-col">
-      {!formData.docs.length ? (
+      {formData.docs.length === 0 ? (
         'Form not found'
       ) : (
         <div className="flex flex-col gap-8">

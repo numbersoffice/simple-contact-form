@@ -62,6 +62,7 @@ export default function TableGridForms<TData, TValue>({
           {table.getRowModel().rows?.length ? (
             table.getRowModel().rows.map((row) => (
               <TableRow
+                data-id={row.id}
                 className="cursor-pointer group"
                 onClick={() => handleRowClick(row.getValue('id'))}
                 key={row.id}

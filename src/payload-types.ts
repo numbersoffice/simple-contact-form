@@ -170,6 +170,13 @@ export interface User {
   hash?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
   password?: string | null;
 }
 /**
@@ -201,6 +208,13 @@ export interface AppUser {
   _verificationToken?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
   password?: string | null;
 }
 /**
@@ -238,10 +252,11 @@ export interface Team {
  * via the `definition` "forms".
  */
 export interface Form {
+  id: string;
   name: string;
   team: string | Team;
   recipients?: (string | Recipient)[] | null;
-  id: string;
+  formId?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -392,6 +407,13 @@ export interface UsersSelect<T extends boolean = true> {
   hash?: T;
   loginAttempts?: T;
   lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -413,6 +435,13 @@ export interface AppUsersSelect<T extends boolean = true> {
   _verificationToken?: T;
   loginAttempts?: T;
   lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -449,7 +478,7 @@ export interface FormsSelect<T extends boolean = true> {
   name?: T;
   team?: T;
   recipients?: T;
-  id?: T;
+  formId?: T;
   updatedAt?: T;
   createdAt?: T;
 }

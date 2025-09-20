@@ -37,7 +37,7 @@ export default async function FormsPage({ params }: { params: Promise<{ team: st
 
   const data = res.docs.map((doc) => {
     return {
-      id: doc.id,
+      id: doc.formId,
       name: doc.name,
     } as Form
   })

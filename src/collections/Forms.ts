@@ -27,14 +27,14 @@ export const Forms: CollectionConfig = {
       hasMany: true,
     },
     {
-      name: 'id',
+      name: 'formId',
       type: 'text',
       unique: true,
-      required: true,
-      // Auto generate if not provided
       hooks: {
         beforeValidate: [
-          async ({ value }) => {
+          // Auto generate formId if not provided
+          async ({ value, field }) => {
+            console.log(field)
             if (!value) {
               return generateId()
             }
@@ -43,10 +43,29 @@ export const Forms: CollectionConfig = {
         ],
       },
     },
+
+    // {
+    //   name: 'id',
+    //   type: 'text',
+    //   unique: true,
+    //   required: true,
+    //   hooks: {
+    //     beforeValidate: [
+    //       // Auto generate ID if not provided
+    //       async ({ value }) => {
+    //         console.log(value)
+    //         if (!value) {
+    //           return generateId()
+    //         }
+    //         return value
+    //       },
+    //     ],
+    //   },
+    // },
   ],
   access: {
     create: associatesOnly,
-    read: associatesOnly,
+    read: () => true, //associatesOnly,
     update: associatesOnly,
     delete: ownersOnly,
   },
