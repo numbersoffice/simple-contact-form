@@ -29,17 +29,7 @@ export default async function HomePage() {
             <GitHub className="mr-1" />
             View on GitHub
           </a>
-          {/* <h1 className="text-5xl md:text-7xl max-w-[550px] text-center mx-auto font-bold">
-            Simple <br />
-            Contact Form
-          </h1> */}
-          <Image
-            src="/images/scf_title.jpg"
-            width={400}
-            height={270}
-            alt="Simple Contact Form"
-            // className="w-full max-w-[400px]"
-          />
+          <Image src="/images/scf_title.jpg" width={400} height={270} alt="Simple Contact Form" />
         </div>
         <p className="text-xl text-gray-600 max-w-[550px] mx-auto text-center">
           Spam protected form submissions directly to your email inbox. No backend setup required.

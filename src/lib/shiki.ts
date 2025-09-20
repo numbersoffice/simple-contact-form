@@ -1,5 +1,4 @@
 import { createHighlighter } from 'shiki'
-import { bundledLanguages } from 'shiki/bundle/web'
 
 // Singleton highlighter instance
 import type { Highlighter } from 'shiki'
@@ -10,7 +9,7 @@ async function getSingletonHighlighter() {
   if (!highlighterPromise) {
     highlighterPromise = createHighlighter({
       themes: ['github-light', 'github-dark', 'aurora-x', 'monokai'],
-      langs: [...Object.keys(bundledLanguages)],
+      langs: ['go', 'jsx', 'html'],
     })
   }
   return highlighterPromise
