@@ -1,6 +1,11 @@
 # Simple Contact Form
 
-This project provides a spam-protected, pay-as-you-go endpoint for form submissions to be delivered via email.
+This project provides an interface to host and manage contact form forwarders. It is based on Nextjs and uses Payload CMS as the application framework. The main features are:
+ - Team creation and role based user management
+ - Double opt-in forwarding-address verification
+ - OpenAI integration for spam filtering of form submissions
+ - Payment method management and credit refill mechanics
+ - Billing integration with stripe
 
 
 ## Getting Started
@@ -10,22 +15,37 @@ Clone the repository and install the dependencies:
 npm install
 ```
 
-### Environment Variables & Required Services
-> **Note:** You must have running instances of MongoDB and valid credentials for Stripe, Resend, and OpenAI.
+### 1. Environment Variables & Required Services
+> **Note:** To run the project you will need a MongoDB instance, credentials for Stripe and OpenAI, as well as SMTP credentials for sending emails.
 
-Create an `.env` file with the following values:
-- **MongoDB**: Used as the primary database. Set `DATABASE_URI`.
-- **Stripe**: For billing and payments. Set `STRIPE_SECRET_KEY` and `NEXT_PUBLIC_STRIPE_KEY`.
-- **Resend**: For email delivery. Set `RESEND_API_KEY`.
-- **OpenAI**: For AI features. Set `OPENAI_API_KEY`.
-- **Payload Secret**: Used to encrypt user tokens. Set `PAYLOAD_SECRET`.
-- **Host URL**: For routing. Set `NEXT_PUBLIC_HOST_URL` to your app's public URL.
+Create an **.env** file in the project root with the following keys:
 
+Secret
+- `DATABASE_URI` Connection string for MongoDB
+- `STRIPE_SECRET_KEY` Stripe secret key
+- `STRIPE_WEBHOOK_SIGNING_SECRET` Use signing secret from the next step
+- `OPENAI_API_KEY` OpenAI API key
+- `PAYLOAD_SECRET` Choose a random string that will be used to encrypt user tokens
+- `SMTP_HOST` SMTP endpoint
+- `SMTP_USER` SMTP username
+- `SMTP_PASS` SMTP password
+
+Public
+- `NEXT_PUBLIC_STRIPE_KEY` Stripe public key
+- `NEXT_PUBLIC_HOST_URL` Your app's public URL including protocoll
+
+### 2. Set up Stripe webhooks
+Create a Stripe webhook listening for the following three events:
+- charge.succeeded
+- payment_method.attached
+- payment_method.detached
+
+Set the endpoint URL to `PROTOCOL://YOUR_URL/api/webhook`. You can run webhooks locally using the [Stripe CLI](https://docs.stripe.com/webhooks/quickstart).
 ## Development
 
-This project is under **active development**. Features and APIs may change frequently.
+This project is under **active development**. Features and APIs will change frequently.
 
-To start the development server:
+To start the development server run:
 
 ```bash
 npm run dev
@@ -34,3 +54,8 @@ npm run dev
 ## License
 
 [MIT](LICENSE)
+
+## Images
+![landing page with large, red lettering spelling "simple contact form"](/public/readme/screenshot_1.jpg)
+![form management screen exposing the form id](/public/readme/screenshot_2.jpg)
+![billing dashboard with payment management options](/public/readme/screenshot_3.jpg)
