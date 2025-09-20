@@ -5,7 +5,8 @@ import path from 'path'
 import { buildConfig } from 'payload'
 import { fileURLToPath } from 'url'
 import sharp from 'sharp'
-import { resendAdapter } from '@payloadcms/email-resend'
+// import { resendAdapter } from '@payloadcms/email-resend'
+import { nodemailerAdapter } from '@payloadcms/email-nodemailer'
 
 import { Users } from './collections/Users'
 import { AppUsers } from './collections/AppUsers'
@@ -36,9 +37,16 @@ export default buildConfig({
   }),
   sharp,
   plugins: [payloadCloudPlugin()],
-  email: resendAdapter({
+  email: nodemailerAdapter({
     defaultFromAddress: 'noreply@simplecontactform.org',
     defaultFromName: 'Simple Contact Form',
-    apiKey: process.env.RESEND_API_KEY || '',
+    transportOptions: {
+      host: process.env.SMTP_HOST,
+      port: 587,
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
+      },
+    },
   }),
 })

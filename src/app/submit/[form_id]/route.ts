@@ -84,7 +84,9 @@ export async function POST(
     }
     fields = fields.map((f) => ({
       ...f,
-      value: String(f.value).slice(0, MAX_FIELD_LEN) + ' [max length reached]',
+      value:
+        String(f.value).slice(0, MAX_FIELD_LEN) +
+        (f.value.length > MAX_FIELD_LEN ? ' [max length reached]' : ''),
       name: String(f.name).slice(0, 200),
     }))
 
@@ -99,16 +101,16 @@ export async function POST(
     const hasHoneypot = fields.some((f) => HONEYPOTS.includes(f.name) && f.value)
     if (hasHoneypot)
       return withCORS(
-        customResponse(
-          200,
-          {
-            message: 'Form submitted.',
-            success: true,
-          },
-          // This message is only logged server-side and not sent to the client
+        successResponse(
+          isHtmlForm,
+          returnUrl,
+          'Form submitted.',
           'Honeypot detected. Not sending email.',
         ),
       )
+
+    // Remove utility fields
+    fields = fields.filter((f) => !HONEYPOTS.includes(f.name))
 
     // Check if message is spam
     const isSpam = await checkforSpam(fields)
