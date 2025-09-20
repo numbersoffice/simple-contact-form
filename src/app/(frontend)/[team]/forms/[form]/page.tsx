@@ -68,7 +68,6 @@ export default async function FormPage({
       },
     }),
   ])
-  console.log(formData.docs)
 
   // Extract active recipients from form data
   const formRecipients = formData.docs[0].recipients || []

@@ -5,6 +5,8 @@
   "license": "MIT",
   "type": "module",
   "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
     "build": "cross-env NODE_OPTIONS=--no-deprecation next build",
     "dev": "cross-env NODE_OPTIONS=--no-deprecation next dev",
     "devsafe": "rm -rf .next && cross-env NODE_OPTIONS=--no-deprecation next dev",
@@ -73,9 +75,11 @@
     "stripe": "^17.7.0",
     "tailwind-merge": "^3.0.2",
     "tailwindcss": "^4.0.15",
+    "testcontainers": "^11.6.0",
     "tw-animate-css": "^1.2.4",
     "uuid": "^11.1.0",
     "vaul": "^1.1.2",
+    "vitest": "^3.2.4",
     "zod": "^3.24.2"
   },
   "devDependencies": {
