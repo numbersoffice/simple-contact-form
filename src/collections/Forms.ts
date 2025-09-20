@@ -33,8 +33,7 @@ export const Forms: CollectionConfig = {
       hooks: {
         beforeValidate: [
           // Auto generate formId if not provided
-          async ({ value, field }) => {
-            console.log(field)
+          async ({ value }) => {
             if (!value) {
               return generateId()
             }
@@ -43,25 +42,6 @@ export const Forms: CollectionConfig = {
         ],
       },
     },
-
-    // {
-    //   name: 'id',
-    //   type: 'text',
-    //   unique: true,
-    //   required: true,
-    //   hooks: {
-    //     beforeValidate: [
-    //       // Auto generate ID if not provided
-    //       async ({ value }) => {
-    //         console.log(value)
-    //         if (!value) {
-    //           return generateId()
-    //         }
-    //         return value
-    //       },
-    //     ],
-    //   },
-    // },
   ],
   access: {
     create: associatesOnly,
