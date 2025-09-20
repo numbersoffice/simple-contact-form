@@ -179,10 +179,7 @@ export async function POST(
 
     // All checks passed
     // Build message
-    const message = fields
-      .map((field) => `${field.name}: ${field.value}`)
-      .join('\n')
-      .replace(/,/g, '\n')
+    const message = fields.map((field) => `${field.name}:\n${field.value}\n`).join('\n')
 
     // Send emails
     try {
