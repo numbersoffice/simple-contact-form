@@ -18,18 +18,13 @@ export default async function Layout({ children }: { children: React.ReactNode }
           </Link>
         </div>
 
-        <div className="flex flex-col md:flex-row gap-2 justify-center items-center  w-full">
-          <Image
-            width={40}
-            height={40}
-            alt="Fotura Logo"
-            src="/images/fotura_logo.jpg"
-            className="h-5 w-5 flex-shrink-0"
-          />
-          <p className="text-sm text-gray-500 block text-center">
-            Simple Contact Form is a Fotura, Inc. service
-          </p>
-        </div>
+        <p className="text-sm text-gray-500 block text-center">
+          Simple Contact Form is a{' '}
+          <a className="hover:underline" href="https://www.numbersoffice.com">
+            Numbers Office LLC
+          </a>{' '}
+          service
+        </p>
       </footer>
     </>
   )
