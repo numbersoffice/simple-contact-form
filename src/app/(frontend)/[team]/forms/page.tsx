@@ -11,7 +11,7 @@ const columns: ColumnDef<Form>[] = [
     header: 'Name',
   },
   {
-    accessorKey: 'id',
+    accessorKey: 'formId',
     header: 'Form ID',
   },
 ]
@@ -37,7 +37,8 @@ export default async function FormsPage({ params }: { params: Promise<{ team: st
 
   const data = res.docs.map((doc) => {
     return {
-      id: doc.formId,
+      id: doc.id,
+      formId: doc.formId,
       name: doc.name,
     } as Form
   })

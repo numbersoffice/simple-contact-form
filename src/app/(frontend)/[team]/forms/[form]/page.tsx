@@ -52,7 +52,7 @@ export default async function FormPage({
       overrideAccess: false,
       user,
       where: {
-        formId: { equals: awaitedParams.form },
+        id: { equals: awaitedParams.form },
       },
       limit: 1,
     }),
@@ -108,7 +108,7 @@ export default async function FormPage({
           </div>
           <div>
             <h3 className="font-semibold mb-2">Form ID</h3>
-            <p className="p-2 px-4 bg-muted rounded-md w-fit font-mono">{formData.docs[0].id}</p>
+            <p className="p-2 px-4 bg-muted rounded-md w-fit font-mono">{formData.docs[0].formId}</p>
           </div>
 
           <FormRecipientEditor

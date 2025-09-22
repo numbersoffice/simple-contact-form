@@ -17,15 +17,16 @@ import { toast } from 'sonner'
 export type Form = {
   id: string
   name: string
+  formId: string
   status: 'active' | 'pending'
 }
 
-interface DataTableProps<TData, TValue> {
+interface DataTableProps<TData extends { id: string }, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
 }
 
-export default function TableGridForms<TData, TValue>({
+export default function TableGridForms<TData extends { id: string }, TValue>({
   columns,
   data,
 }: DataTableProps<TData, TValue>) {
@@ -64,7 +65,7 @@ export default function TableGridForms<TData, TValue>({
               <TableRow
                 data-id={row.id}
                 className="cursor-pointer group"
-                onClick={() => handleRowClick(row.getValue('id'))}
+                onClick={() => handleRowClick(row.original.id)}
                 key={row.id}
                 data-state={row.getIsSelected() && 'selected'}
               >
@@ -89,7 +90,7 @@ export default function TableGridForms<TData, TValue>({
                           toast.success('Copied to clipboard')
                         }}
                       >
-                        {cell.getValue() as ReactNode}{' '}
+                        {cell.getValue() as ReactNode}
                         <ClipboardCopy
                           size={23}
                           className="duration-150 p-1 rounded-sm hover:bg-gray-200"
