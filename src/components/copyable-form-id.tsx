@@ -6,16 +6,17 @@ import { toast } from 'sonner'
 export default function CopyableFormId({ formId }: { formId: string }) {
   function handleCopy() {
     navigator.clipboard.writeText(formId)
-    toast.success('Copied to clipboard')
+    toast.success('Form ID copied')
   }
 
   return (
-    <div
-      className="p-2 px-4 bg-muted rounded-md w-fit font-mono flex items-center gap-2 cursor-pointer hover:bg-muted/80 transition-colors"
+    <button
+      type="button"
+      className="cursor-pointer inline-flex items-center gap-1.5 rounded-md bg-muted px-2 py-1 font-mono text-sm"
       onClick={handleCopy}
     >
-      {formId}
-      <ClipboardCopy size={16} className="text-muted-foreground" />
-    </div>
+      <span className="max-w-[180px] truncate">{formId}</span>
+      <ClipboardCopy size={14} className="text-muted-foreground shrink-0" />
+    </button>
   )
 }

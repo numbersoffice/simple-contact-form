@@ -2,8 +2,9 @@
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-// import { useState } from 'react'
-import { Badge } from './ui/badge'
+import { useState } from 'react'
+import { Checkbox } from './ui/checkbox'
+import { Loader2 } from 'lucide-react'
 
 export default function FormRecipientEditor({
   formId,
@@ -15,11 +16,12 @@ export default function FormRecipientEditor({
   teamId: string
 }) {
   const router = useRouter()
-  // const [isUpdating, setIsUpdating] = useState(false)
+  const [updatingId, setUpdatingId] = useState<string | null>(null)
+
+  const activeCount = recipients.filter((r) => r.active).length
 
   async function handleChange(recipientId: string) {
-    // Handle recipient change logic here
-    console.log(`Recipient ${recipientId} clicked`)
+    setUpdatingId(recipientId)
 
     // Check if the recipient is already active
     const recipient = recipients.find((r) => r.id === recipientId)
@@ -29,8 +31,6 @@ export default function FormRecipientEditor({
 
       // Create array with ids of active recipients
       const activeRecipients = recipients.filter((r) => r.active).map((r) => r.id)
-
-      // setIsUpdating(true)
 
       // Update the form with the new active recipients
       const res = await fetch(`/api/forms/${formId}`, {
@@ -42,48 +42,66 @@ export default function FormRecipientEditor({
       })
 
       if (res.ok) {
-        console.log('Form updated successfully')
         router.refresh()
       }
-
-      // setIsUpdating(false)
     }
+
+    setUpdatingId(null)
   }
+
   return (
     <div>
-      <div>
-        <h2 className="font-semibold">Recipients</h2>
-        <p className="text-sm text-gray-500 mt-2 mb-4">
-          Click addresses to toggle between{' '}
-          <Badge variant="outline" className="text-gray-700">
-            Inactive
-          </Badge>{' '}
-          and <Badge className="bg-blue-500 text-white">Receiving submissions</Badge> (Changes are
-          saved automatically)
-        </p>
-      </div>
-      <div className="rounded-md border-[1px] border-gray-200 p-4 flex gap-2">
-        {recipients.length > 0 ? (
-          recipients.map((r) => (
-            <Badge
-              className={`cursor-pointer hover:opacity-90 ${r.active ? 'bg-blue-500 text-white' : 'text-gray-700'}`}
-              variant={r.active ? 'default' : 'outline'}
-              key={r.id}
-              onClick={() => handleChange(r.id)}
-            >
-              {r.email}
-            </Badge>
-          ))
-        ) : (
-          <p className="text-sm mx-auto text-gray-400">
-            No verified recipients availalable. Check their status{' '}
-            <Link className="underline" href={`/${teamId}/recipients`}>
-              here
-            </Link>
-            .
+      <div className="flex items-center justify-between mb-3">
+        <div>
+          <h3 className="font-semibold">Recipients</h3>
+          <p className="text-sm text-muted-foreground">
+            Select which addresses receive form submissions.
           </p>
+        </div>
+      </div>
+
+      <div className="rounded-md border border-border overflow-hidden">
+        {recipients.length > 0 ? (
+          <div className="divide-y divide-border max-h-[280px] overflow-y-auto">
+            {recipients.map((r) => (
+              <label
+                key={r.id}
+                className={`flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted/50 transition-colors ${
+                  updatingId === r.id ? 'opacity-60' : ''
+                }`}
+              >
+                <div className="w-4 h-4 flex items-center justify-center">
+                  {updatingId === r.id ? (
+                    <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                  ) : (
+                    <Checkbox
+                      checked={r.active}
+                      onCheckedChange={() => handleChange(r.id)}
+                      disabled={updatingId !== null}
+                    />
+                  )}
+                </div>
+                <span
+                  className={`text-sm ${r.active ? 'text-foreground' : 'text-muted-foreground'}`}
+                >
+                  {r.email}
+                </span>
+              </label>
+            ))}
+          </div>
+        ) : (
+          <div className="p-4 text-center">
+            <p className="text-sm text-muted-foreground">
+              No verified recipients available.{' '}
+              <Link className="underline hover:text-foreground" href={`/${teamId}/recipients`}>
+                Add recipients
+              </Link>
+            </p>
+          </div>
         )}
       </div>
+
+      <p className="text-xs text-muted-foreground mt-2">Changes are saved automatically.</p>
     </div>
   )
 }
