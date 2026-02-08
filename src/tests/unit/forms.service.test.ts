@@ -25,7 +25,7 @@ const baseDeps = () => ({
       new Response(JSON.stringify(body), { status }),
     extractFormData: (fd: FormData) =>
       Array.from(fd.entries()).map(([name, value]) => ({ name, value: String(value) })),
-    successResponse: (_isHtml: boolean, _returnUrl: string, message: string) =>
+    successResponse: (_wantsJson: boolean, _returnUrl: string, message: string) =>
       new Response(JSON.stringify({ ok: true, message }), { status: 200 }),
     withCORS: (res: Response) => res,
   },

@@ -20,7 +20,7 @@ export type ServiceDeps = {
       logMessage?: string,
     ) => Response
     successResponse: (
-      isHtmlForm: boolean,
+      wantsJson: boolean,
       redirect: string,
       message: string,
       logMessage?: string,

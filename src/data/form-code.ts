@@ -18,8 +18,8 @@ export function reactForm(url: string) {
   async function handleSubmit(e) {
     e.preventDefault();
 
-    // Send form data to the server
-    const res = await fetch("${url}", {
+    // Add ?format=json to get JSON response instead of redirect
+    const res = await fetch("${url}?format=json", {
       method: "POST",
       body: new FormData(e.target),
     });
@@ -65,7 +65,8 @@ func main() {
 
     writer.Close()
 
-    req, err := http.NewRequest("POST", "${url}", &buf)
+    // Add ?format=json to get JSON response instead of redirect
+    req, err := http.NewRequest("POST", "${url}?format=json", &buf)
     if err != nil {
         panic(err)
     }

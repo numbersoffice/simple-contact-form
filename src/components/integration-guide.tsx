@@ -26,7 +26,8 @@ formData.append('Name', 'John Doe');
 formData.append('Email', 'john@example.com');
 formData.append('Message', 'Hello!');
 
-const response = await fetch('${submitUrl}', {
+// Add ?format=json to get a JSON response instead of redirect
+const response = await fetch('${submitUrl}?format=json', {
   method: 'POST',
   body: formData,
 });
@@ -34,7 +35,8 @@ const response = await fetch('${submitUrl}', {
 const result = await response.json();
 console.log(result);`
 
-  const curlCode = `curl -X POST '${submitUrl}' \\
+  const curlCode = `# Add ?format=json to get JSON response
+curl -X POST '${submitUrl}?format=json' \\
   -F 'Name=John Doe' \\
   -F 'Email=john@example.com' \\
   -F 'Message=Hello!'`
@@ -61,14 +63,14 @@ console.log(result);`
       code: fetchCode,
       highlightedHtml: fetchHighlighted,
       description:
-        'Use the Fetch API for programmatic submissions. The response includes a success status.',
+        'Use the Fetch API for programmatic submissions. Add ?format=json to receive a JSON response.',
     },
     {
       id: 'curl',
       label: 'cURL',
       code: curlCode,
       highlightedHtml: curlHighlighted,
-      description: 'Test your form endpoint from the command line using cURL.',
+      description: 'Test your form endpoint from the command line. Add ?format=json for JSON output.',
     },
   ]
 
