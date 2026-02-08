@@ -1,5 +1,6 @@
 import '@/styles/globals.css'
 import Link from 'next/link'
+import Script from 'next/script'
 
 export default async function Layout({ children }: { children: React.ReactNode }) {
   return (
