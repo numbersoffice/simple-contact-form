@@ -9,7 +9,7 @@ async function getSingletonHighlighter() {
   if (!highlighterPromise) {
     highlighterPromise = createHighlighter({
       themes: ['github-light', 'github-dark', 'aurora-x', 'monokai'],
-      langs: ['go', 'jsx', 'html'],
+      langs: ['go', 'jsx', 'html', 'javascript', 'bash'],
     })
   }
   return highlighterPromise
