@@ -17,6 +17,7 @@ npm install
 > **Note:** To run the project you will need a MongoDB instance, credentials for OpenAI, as well as SMTP credentials for sending emails.
 
 Create an **.env** file in the project root with the following keys:
+- `NEXT_PUBLIC_HOST_URL` The base URL where the site will be available
 - `DATABASE_URI` Connection string for MongoDB
 - `OPENAI_API_KEY` OpenAI API key
 - `PAYLOAD_SECRET` Choose a random string that will be used to encrypt user tokens
