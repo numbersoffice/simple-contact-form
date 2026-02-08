@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
 import payload from '@/lib/payload'
-import { consumeBalance } from '@/functions/billing'
 import checkforSpam from '@/functions/spam'
 import {
   checkQueryParams,
@@ -31,7 +30,6 @@ export async function POST(
   const awaitedParams = await params
   const deps: ServiceDeps = {
     payload,
-    consumeBalance,
     checkforSpam,
     utils: { checkQueryParams, customResponse, extractFormData, successResponse, withCORS },
     config: {

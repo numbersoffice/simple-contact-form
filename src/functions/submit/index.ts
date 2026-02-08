@@ -5,7 +5,7 @@ import type { Recipient } from '@/payload-types'
 export async function handleFormSubmission(
   request: NextRequest,
   params: { form_id: string },
-  { payload, consumeBalance, checkforSpam, utils, config }: ServiceDeps,
+  { payload, checkforSpam, utils, config }: ServiceDeps,
 ): Promise<Response> {
   const { checkQueryParams, customResponse, extractFormData, successResponse, withCORS } = utils
   const { MAX_BYTES, MAX_FIELDS, MAX_FIELD_LEN, HONEYPOTS } = config
@@ -97,16 +97,6 @@ export async function handleFormSubmission(
     // Remove utility fields
     fields = fields.filter((f) => !HONEYPOTS.includes(f.name))
 
-    // Check if message is spam
-    const isSpam = await checkforSpam(fields)
-    if (isSpam) {
-      // Log spam
-      console.log('Spam detected. Not sending email.')
-
-      // Send regular success response in order to not give away spam detection to malicious actors
-      return withCORS(successResponse(isHtmlForm, returnUrl, 'Form submitted.'))
-    }
-
     ////////////////////////////
     // ALL CONTENT CHECKS PASSED
     ////////////////////////////
@@ -122,7 +112,7 @@ export async function handleFormSubmission(
     })
 
     // Check if form exists
-    if (!formRes) {
+    if (!formRes || !formRes.docs.length) {
       return withCORS(
         customResponse(400, {
           success: false,
@@ -131,18 +121,10 @@ export async function handleFormSubmission(
       )
     }
 
-    // Check if recipients field exists
-    const recipients = formRes.docs[0].recipients
-    if (!recipients || !Array.isArray(recipients) || recipients.length === 0)
-      return withCORS(
-        customResponse(500, {
-          message: 'Error: Recipients field is not set up correctly.',
-          success: false,
-        }),
-      )
+    const form = formRes.docs[0]
 
     // Check if form has a team
-    const team = formRes.docs[0].team
+    const team = form.team
     if (!team || typeof team !== 'object' || !('id' in team))
       return withCORS(
         customResponse(500, {
@@ -151,16 +133,31 @@ export async function handleFormSubmission(
         }),
       )
 
-    // Billing - Charge team for form submission
-    const chargeRes = await consumeBalance({ team, charge: 1 })
-    if (chargeRes.error) {
+    // Check if spam filtering is enabled and API key exists
+    const spamFilterEnabled = form.spamFilterEnabled
+    const openaiKey = 'openaiKey' in team ? (team.openaiKey as string) : null
+
+    if (spamFilterEnabled && openaiKey && form.spamFilterPrompt) {
+      // Check if message is spam
+      const isSpam = await checkforSpam(fields, openaiKey, form.spamFilterPrompt)
+      if (isSpam) {
+        // Log spam
+        console.log('Spam detected. Not sending email.')
+
+        // Send regular success response in order to not give away spam detection to malicious actors
+        return withCORS(successResponse(isHtmlForm, returnUrl, 'Form submitted.'))
+      }
+    }
+
+    // Check if recipients field exists
+    const recipients = form.recipients
+    if (!recipients || !Array.isArray(recipients) || recipients.length === 0)
       return withCORS(
         customResponse(500, {
-          message: chargeRes.error,
+          message: 'Error: Recipients field is not set up correctly.',
           success: false,
         }),
       )
-    }
 
     // All checks passed
     // Build message
@@ -174,7 +171,7 @@ export async function handleFormSubmission(
 
         payload.sendEmail({
           to: r.email,
-          subject: 'Submission - ' + formRes.docs[0].name,
+          subject: 'Submission - ' + form.name,
           text: message,
         })
       })

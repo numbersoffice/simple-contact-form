@@ -1,13 +1,14 @@
 /* eslint-disable @typescript-eslint/no-unsafe-function-type */
-import { Team } from '@/payload-types'
-
 export type ServiceDeps = {
   payload: {
     find: Function
     sendEmail: Function
   }
-  consumeBalance: (args: { team: Team; charge: number }) => Promise<{ error?: string }>
-  checkforSpam: (fields: Array<{ name: string; value: string }>) => Promise<boolean>
+  checkforSpam: (
+    fields: Array<{ name: string; value: string }>,
+    apiKey: string,
+    customPrompt: string,
+  ) => Promise<boolean>
   utils: {
     checkQueryParams: (
       params: Record<string, unknown>,

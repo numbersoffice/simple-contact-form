@@ -42,6 +42,23 @@ export const Forms: CollectionConfig = {
         ],
       },
     },
+    {
+      name: 'spamFilterEnabled',
+      type: 'checkbox',
+      defaultValue: false,
+      admin: {
+        description: 'Enable AI-powered spam filtering for this form',
+      },
+    },
+    {
+      name: 'spamFilterPrompt',
+      type: 'textarea',
+      admin: {
+        description: 'Describe the purpose of your form to help the AI identify spam',
+      },
+      defaultValue:
+        'This is a general contact form. Filter out spam, promotional content, automated submissions, and messages that are not genuine contact attempts from real people seeking to communicate.',
+    },
   ],
   access: {
     create: associatesOnly,
