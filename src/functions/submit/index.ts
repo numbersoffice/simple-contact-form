@@ -24,28 +24,12 @@ export async function handleFormSubmission(
       )
     }
 
-    // Content-Type detection (form or programmatic)
-    // const contentType = (request.headers.get('content-type') || '').toLowerCase()
-    // const isHtmlForm =
-    //   contentType.includes('application/x-www-form-urlencoded') ||
-    //   contentType.includes('multipart/form-data')
-    const h = request.headers
-    const secMode = (h.get('sec-fetch-mode') || '').toLowerCase()
-    const secDest = (h.get('sec-fetch-dest') || '').toLowerCase()
-    const secUser = (h.get('sec-fetch-user') || '').toLowerCase()
-    const accept = (h.get('accept') || '').toLowerCase()
-    const xrw = (h.get('x-requested-with') || '').toLowerCase()
-    const htmx = (h.get('hx-request') || '').toLowerCase() === 'true'
+    // Response format detection via query parameter
+    // ?format=json returns JSON, otherwise redirects (default for HTML forms)
+    const url = new URL(request.url)
+    const wantsJson = url.searchParams.get('format') === 'json'
 
-    let isHtmlForm = false
-
-    if (secMode === 'navigate' || secDest === 'document' || secUser === '?1') isHtmlForm = true
-    else if (xrw === 'xmlhttprequest' || xrw === 'fetch' || htmx) isHtmlForm = false
-    else if (accept.includes('application/json') && !accept.includes('text/html'))
-      isHtmlForm = false
-    else if (accept.includes('text/html')) isHtmlForm = true
-
-    console.info(`${isHtmlForm ? 'Html' : 'Programmatic'} form submission received.`)
+    console.info(`Form submission received (format: ${wantsJson ? 'json' : 'redirect'})`)
 
     // Check if form_id has been provided
     const queryRes = checkQueryParams(params, ['form_id'])
@@ -87,7 +71,7 @@ export async function handleFormSubmission(
     if (hasHoneypot)
       return withCORS(
         successResponse(
-          isHtmlForm,
+          wantsJson,
           returnUrl,
           'Form submitted.',
           'Honeypot detected. Not sending email.',
@@ -145,7 +129,7 @@ export async function handleFormSubmission(
         console.log('Spam detected. Not sending email.')
 
         // Send regular success response in order to not give away spam detection to malicious actors
-        return withCORS(successResponse(isHtmlForm, returnUrl, 'Form submitted.'))
+        return withCORS(successResponse(wantsJson, returnUrl, 'Form submitted.'))
       }
     }
 
@@ -179,7 +163,7 @@ export async function handleFormSubmission(
       console.error('One or more emails failed to send', err)
     }
 
-    return withCORS(successResponse(isHtmlForm, returnUrl, `Form submitted. TeamId: ${team.id}`))
+    return withCORS(successResponse(wantsJson, returnUrl, `Form submitted. TeamId: ${team.id}`))
   } catch (err) {
     console.error('Unhandled form submission error:', err)
     return withCORS(

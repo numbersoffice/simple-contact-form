@@ -61,35 +61,35 @@ export function customResponse(
 }
 
 /**
- * Constructs a new success reponse based on if the request was submitted by an HTML form or programmatically
- * @param isHtmlForm - Boolean indicating if the request was submitted by an HTML form
- * @param redirect - Redirect URL
- * @param message - Message to log
+ * Constructs a success response based on the requested format
+ * @param wantsJson - If true, returns JSON (200). If false, redirects (303).
+ * @param redirect - Redirect URL for non-JSON requests
+ * @param message - Success message
  * @param logMessage - Optional message to log instead of the message
  */
 export function successResponse(
-  isHtmlForm: boolean,
+  wantsJson: boolean,
   redirect: string,
   message: string,
   logMessage?: string,
 ) {
   console.log(logMessage ? logMessage : message)
 
-  // Inlude redirect for html form submissions
-  const formPayload = {
+  // JSON response for programmatic submissions (?format=json)
+  const jsonPayload = {
+    status: 200,
+  }
+
+  // Redirect for HTML form submissions (default)
+  const redirectPayload = {
     status: 303,
     headers: {
       Location: redirect,
     },
   }
 
-  // Send only status for programmatic submissions
-  const programmaticPayload = {
-    status: 200,
-  }
-
   return new Response(
     JSON.stringify({ message, success: true }),
-    isHtmlForm ? formPayload : programmaticPayload,
+    wantsJson ? jsonPayload : redirectPayload,
   )
 }
