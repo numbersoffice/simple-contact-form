@@ -7,6 +7,7 @@ import Code from '@/components/code'
 import { htmlForm, reactForm, goForm } from '@/data/form-code'
 import Image from 'next/image'
 import Navbar from '@/components/navbar'
+import Script from 'next/script'
 
 const baseUrl = process.env.NEXT_PUBLIC_HOST_URL || 'https://simplecontactform.org'
 const demoSubmissionUrl = `${baseUrl}/submit/YOUR_FORM_ID`
@@ -17,41 +18,49 @@ export default async function HomePage() {
   }
 
   return (
-    <div>
-      <Navbar withLogo={false} withAuthButtons />
-      <section className="min-h-[85vh] flex flex-col items-center justify-center py-24 px-6 gap-6">
-        <div className="relative flex flex-col items-center gap-8">
-          <a
-            href="https://github.com/maxibenner/simple-contact-form"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-xs px-3 py-1 rounded-full flex items-center gap-1 border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50"
-            style={{ textDecoration: 'none' }}
-            aria-label="View source on GitHub"
-          >
-            <GitHub className="mr-1" />
-            View on GitHub
-          </a>
-          <Image src="/images/scf_title.jpg" width={400} height={270} alt="Simple Contact Form" />
-        </div>
-        <p className="text-xl text-gray-600 max-w-[550px] mx-auto text-center">
-          Spam protected form submissions directly to your email inbox. No backend setup required.
-        </p>
-        <div className="flex flex-col sm:flex-row gap-4 mt-4 max-w-[600px]">
-          <div className="flex-1 border rounded-lg p-4 bg-background">
-            <h3 className="font-semibold mb-1">Free to use</h3>
-            <p className="text-sm text-gray-600">
-              For personal use or small to medium sized businesses.
-            </p>
+    <>
+      {process.env.HOSTED && (
+        <Script
+          src="//gc.zgo.at/count.js"
+          data-goatcounter="https://simplecontactform.goatcounter.com/count"
+          async
+        />
+      )}
+      <div>
+        <Navbar withLogo={false} withAuthButtons />
+        <section className="min-h-[85vh] flex flex-col items-center justify-center py-24 px-6 gap-6">
+          <div className="relative flex flex-col items-center gap-8">
+            <a
+              href="https://github.com/maxibenner/simple-contact-form"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs px-3 py-1 rounded-full flex items-center gap-1 border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50"
+              style={{ textDecoration: 'none' }}
+              aria-label="View source on GitHub"
+            >
+              <GitHub className="mr-1" />
+              View on GitHub
+            </a>
+            <Image src="/images/scf_title.jpg" width={400} height={270} alt="Simple Contact Form" />
           </div>
-          <div className="flex-1 border rounded-lg p-4 bg-background">
-            <h3 className="font-semibold mb-1">Self-hostable</h3>
-            <p className="text-sm text-gray-600">
-              Run your own instance for full control or higher volume.
-            </p>
+          <p className="text-xl text-gray-600 max-w-[550px] mx-auto text-center">
+            Spam protected form submissions directly to your email inbox. No backend setup required.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 mt-4 max-w-[600px]">
+            <div className="flex-1 border rounded-lg p-4 bg-background">
+              <h3 className="font-semibold mb-1">Free to use</h3>
+              <p className="text-sm text-gray-600">
+                For personal use or small to medium sized businesses.
+              </p>
+            </div>
+            <div className="flex-1 border rounded-lg p-4 bg-background">
+              <h3 className="font-semibold mb-1">Self-hostable</h3>
+              <p className="text-sm text-gray-600">
+                Run your own instance for full control or higher volume.
+              </p>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
       <section className="flex flex-col items-center pb-24 md:pb-48 px-6">
         <Tabs defaultValue="html" className="w-full max-w-[800px]">
