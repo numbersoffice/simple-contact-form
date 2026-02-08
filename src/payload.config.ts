@@ -13,7 +13,6 @@ import { Teams } from './collections/Teams'
 import { Recipients } from './collections/Recipients'
 import { Forms } from './collections/Forms'
 import { Invites } from './collections/Invites'
-import { PaymentMethods } from './collections/PaymentMethods'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -25,7 +24,7 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Users, AppUsers, Teams, Recipients, Forms, Invites, PaymentMethods],
+  collections: [Users, AppUsers, Teams, Recipients, Forms, Invites],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {

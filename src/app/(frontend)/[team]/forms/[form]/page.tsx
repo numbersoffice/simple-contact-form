@@ -1,6 +1,8 @@
+import CopyableFormId from '@/components/copyable-form-id'
 import ElementLock from '@/components/element-lock'
 import FormDropdown from '@/components/form-dropdown'
 import FormRecipientEditor from '@/components/form-recipient-editor'
+import SpamFilterEditor from '@/components/spam-filter-editor'
 import { Button } from '@/components/ui/button'
 import payload from '@/lib/payload'
 import { formatDate } from '@/lib/utils'
@@ -36,6 +38,7 @@ export default async function FormPage({
   const team = typeof teamRes.docs[0] === 'object' && teamRes.docs[0]
   if (!team) return redirect('/login')
   const owners = team.owners?.length ? team.owners : []
+  const hasOpenAIKey = !!team.openaiKey
 
   // Check if the user is an owner of the team
   const isOwner = owners.some((owner) => {
@@ -108,13 +111,20 @@ export default async function FormPage({
           </div>
           <div>
             <h3 className="font-semibold mb-2">Form ID</h3>
-            <p className="p-2 px-4 bg-muted rounded-md w-fit font-mono">{formData.docs[0].formId}</p>
+            <CopyableFormId formId={formData.docs[0].formId || ''} />
           </div>
 
           <FormRecipientEditor
             formId={awaitedParams.form}
             teamId={awaitedParams.team}
             recipients={recipients}
+          />
+
+          <SpamFilterEditor
+            formId={awaitedParams.form}
+            spamFilterEnabled={formData.docs[0].spamFilterEnabled || false}
+            spamFilterPrompt={formData.docs[0].spamFilterPrompt}
+            hasOpenAIKey={hasOpenAIKey}
           />
         </div>
       )}

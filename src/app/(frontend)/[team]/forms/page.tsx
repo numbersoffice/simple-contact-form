@@ -2,19 +2,7 @@ import TableHeaderForms from '@/components/table-header-forms'
 import TableGridForms, { Form } from '@/components/table-grid-forms'
 import payload from '@/lib/payload'
 import { getUser } from '@/lib/utils-server'
-import { ColumnDef } from '@tanstack/react-table'
 import { redirect } from 'next/navigation'
-
-const columns: ColumnDef<Form>[] = [
-  {
-    accessorKey: 'name',
-    header: 'Name',
-  },
-  {
-    accessorKey: 'formId',
-    header: 'Form ID',
-  },
-]
 
 export default async function FormsPage({ params }: { params: Promise<{ team: string }> }) {
   const awaitedParams = await params
@@ -40,13 +28,15 @@ export default async function FormsPage({ params }: { params: Promise<{ team: st
       id: doc.id,
       formId: doc.formId,
       name: doc.name,
+      spamFilterEnabled: doc.spamFilterEnabled || false,
+      recipientCount: Array.isArray(doc.recipients) ? doc.recipients.length : 0,
     } as Form
   })
 
   return (
     <>
       <TableHeaderForms />
-      <TableGridForms columns={columns} data={data} />
+      <TableGridForms data={data} />
     </>
   )
 }

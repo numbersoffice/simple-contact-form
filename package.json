@@ -1,7 +1,6 @@
 {
   "name": "scf",
   "version": "1.0.0",
-  "description": "A blank template to get started with Payload 3.0",
   "license": "MIT",
   "type": "module",
   "scripts": {
@@ -48,8 +47,6 @@
     "@radix-ui/react-toggle-group": "^1.1.2",
     "@radix-ui/react-tooltip": "^1.1.8",
     "@react-email/components": "^0.0.36",
-    "@stripe/react-stripe-js": "^3.6.0",
-    "@stripe/stripe-js": "^7.0.0",
     "@tabler/icons-react": "^3.31.0",
     "@tailwindcss/postcss": "^4.0.15",
     "@tanstack/react-table": "^8.21.2",
@@ -72,7 +69,6 @@
     "sharp": "0.32.6",
     "shiki": "^3.2.1",
     "sonner": "^2.0.1",
-    "stripe": "^17.7.0",
     "tailwind-merge": "^3.0.2",
     "tailwindcss": "^4.0.15",
     "testcontainers": "^11.6.0",
@@ -95,10 +91,5 @@
   "engines": {
     "node": "^18.20.2 || >=20.9.0",
     "pnpm": "^9"
-  },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "sharp"
-    ]
   }
 }

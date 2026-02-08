@@ -25,32 +25,17 @@ export const Teams: CollectionConfig = {
       hasMany: true,
     },
     {
-      name: 'balance',
-      type: 'number',
-      defaultValue: 0,
-      admin: {
-        description: 'Current balance in cents',
-      },
-    },
-    {
-      name: 'autoRecharge',
-      type: 'checkbox',
-      defaultValue: false,
-      admin: {
-        description: 'Automatically adds $5 when the balance falls below 25 cents.',
-      },
-    },
-    {
       name: 'forms',
       type: 'join',
       collection: 'forms',
       on: 'team',
     },
     {
-      name: 'paymentMethod',
-      type: 'join',
-      collection: 'payment-methods',
-      on: 'team',
+      name: 'openaiKey',
+      type: 'text',
+      admin: {
+        description: 'OpenAI API key for this team',
+      },
     },
   ],
   access: {
@@ -82,21 +67,11 @@ export const Teams: CollectionConfig = {
       },
     ],
     beforeDelete: [
-      // Remove all forms and payment methods
+      // Remove all forms
       async ({ req, id }) => {
         // Delete forms
         await req.payload.delete({
           collection: 'forms',
-          where: {
-            team: {
-              equals: id,
-            },
-          },
-        })
-
-        // Delete payment methods from Payload
-        await req.payload.delete({
-          collection: 'payment-methods',
           where: {
             team: {
               equals: id,
@@ -113,10 +88,6 @@ export const Teams: CollectionConfig = {
             },
           },
         })
-
-        // ---------------------------------------------------------------------------------------------------
-        // beforeDelete hook of payment-methods collection will handle deleting the payment method from Stripe
-        // ---------------------------------------------------------------------------------------------------
       },
     ],
   },

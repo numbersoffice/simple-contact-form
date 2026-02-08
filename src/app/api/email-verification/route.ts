@@ -1,10 +1,5 @@
 import payload from '@/lib/payload'
 import { redirect } from 'next/navigation'
-import Stripe from 'stripe'
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
-  apiVersion: '2025-02-24.acacia',
-})
 
 export async function GET(request: Request) {
   let email = ''
@@ -39,41 +34,6 @@ export async function GET(request: Request) {
       )
     }
 
-    // Create stripe customer
-    const customer = await stripe.customers.list({ email })
-
-    // Create new customer if it doesn't exist
-    if (!customer.data.length) {
-      const newCustomer = await stripe.customers.create({
-        email,
-      })
-      customer.data.push(newCustomer)
-
-      if (!newCustomer.id) {
-        console.error(`${email}: Failed to create stripe customer`)
-        throw new Error('Failed to create stripe customer')
-      }
-    }
-
-    // Add stripe customer ID to the user
-    // Get user
-    const user = await payload.find({
-      collection: 'app-users',
-      where: {
-        email: {
-          equals: email,
-        },
-      },
-    })
-
-    await payload.update({
-      collection: 'app-users',
-      id: user.docs[0].id,
-      data: {
-        stripeCustomerId: customer.data[0].id,
-      },
-    })
-    console.log(`${email}: Stripe customer ID added to user`)
   } catch (error) {
     // Log error details for debugging and return a generic error message
     console.error('Error during email verification:', error)

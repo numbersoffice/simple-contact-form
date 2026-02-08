@@ -1,7 +1,7 @@
 'use client'
 
 import { Invite } from '@/payload-types'
-import { FileText, LogOut, MailCheck, MenuIcon, Users, Wallet, X } from 'lucide-react'
+import { FileText, LogOut, MailCheck, MenuIcon, Settings, Users, X } from 'lucide-react'
 import { AppSidebar, ExtendedTeam } from './app-sidebar'
 import { TeamSwitcher } from './team-switcher'
 import { Button } from './ui/button'
@@ -49,11 +49,11 @@ export default function Dashboard({
         ownerOnly: false,
       },
       {
-        title: 'Credits',
-        url: `/${activeTeamId}/billing`,
-        icon: Wallet,
+        title: 'Settings',
+        url: `/${activeTeamId}/settings`,
+        icon: Settings,
         ownerOnly: true,
-      },
+      }
     ],
   }
 

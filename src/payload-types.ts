@@ -74,7 +74,6 @@ export interface Config {
     recipients: Recipient;
     forms: Form;
     invites: Invite;
-    'payment-methods': PaymentMethod;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -86,7 +85,6 @@ export interface Config {
     };
     teams: {
       forms: 'forms';
-      paymentMethod: 'payment-methods';
     };
   };
   collectionsSelect: {
@@ -96,7 +94,6 @@ export interface Config {
     recipients: RecipientsSelect<false> | RecipientsSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
     invites: InvitesSelect<false> | InvitesSelect<true>;
-    'payment-methods': PaymentMethodsSelect<false> | PaymentMethodsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -196,7 +193,6 @@ export interface AppUser {
     hasNextPage?: boolean;
     totalDocs?: number;
   };
-  stripeCustomerId?: string | null;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -226,24 +222,15 @@ export interface Team {
   name: string;
   members?: (string | AppUser)[] | null;
   owners?: (string | AppUser)[] | null;
-  /**
-   * Current balance in cents
-   */
-  balance?: number | null;
-  /**
-   * Automatically adds $5 when the balance falls below 25 cents.
-   */
-  autoRecharge?: boolean | null;
   forms?: {
     docs?: (string | Form)[];
     hasNextPage?: boolean;
     totalDocs?: number;
   };
-  paymentMethod?: {
-    docs?: (string | PaymentMethod)[];
-    hasNextPage?: boolean;
-    totalDocs?: number;
-  };
+  /**
+   * OpenAI API key for this team
+   */
+  openaiKey?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -257,6 +244,14 @@ export interface Form {
   team: string | Team;
   recipients?: (string | Recipient)[] | null;
   formId?: string | null;
+  /**
+   * Enable AI-powered spam filtering for this form
+   */
+  spamFilterEnabled?: boolean | null;
+  /**
+   * Describe the purpose of your form to help the AI identify spam
+   */
+  spamFilterPrompt?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -270,25 +265,6 @@ export interface Recipient {
   verified: boolean;
   team: string | Team;
   verificationToken?: string | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payment-methods".
- */
-export interface PaymentMethod {
-  id: string;
-  cardBrand: string;
-  lastFour: string;
-  expiryMonth: number;
-  expiryYear: number;
-  status: 'active' | 'inactive';
-  owner: string | AppUser;
-  stripePaymentMethodId: string;
-  stripeCustomerId: string;
-  stripeFingerprint: string;
-  team: string | Team;
   updatedAt: string;
   createdAt: string;
 }
@@ -336,10 +312,6 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'invites';
         value: string | Invite;
-      } | null)
-    | ({
-        relationTo: 'payment-methods';
-        value: string | PaymentMethod;
       } | null);
   globalSlug?: string | null;
   user:
@@ -423,7 +395,6 @@ export interface AppUsersSelect<T extends boolean = true> {
   'default-team'?: T;
   'owned-teams'?: T;
   'member-teams'?: T;
-  stripeCustomerId?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -451,10 +422,8 @@ export interface TeamsSelect<T extends boolean = true> {
   name?: T;
   members?: T;
   owners?: T;
-  balance?: T;
-  autoRecharge?: T;
   forms?: T;
-  paymentMethod?: T;
+  openaiKey?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -479,6 +448,8 @@ export interface FormsSelect<T extends boolean = true> {
   team?: T;
   recipients?: T;
   formId?: T;
+  spamFilterEnabled?: T;
+  spamFilterPrompt?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -492,24 +463,6 @@ export interface InvitesSelect<T extends boolean = true> {
   'team-name'?: T;
   role?: T;
   verificationToken?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payment-methods_select".
- */
-export interface PaymentMethodsSelect<T extends boolean = true> {
-  cardBrand?: T;
-  lastFour?: T;
-  expiryMonth?: T;
-  expiryYear?: T;
-  status?: T;
-  owner?: T;
-  stripePaymentMethodId?: T;
-  stripeCustomerId?: T;
-  stripeFingerprint?: T;
-  team?: T;
   updatedAt?: T;
   createdAt?: T;
 }

@@ -36,12 +36,6 @@ export const AppUsers: CollectionConfig = {
       type: 'join',
       collection: 'teams',
       on: 'members',
-    },
-    {
-      name: 'stripeCustomerId',
-      type: 'text',
-      required: false,
-      unique: true,
-    },
+    }
   ],
 }

@@ -8,28 +8,53 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { Badge } from '@/components/ui/badge'
 import { ColumnDef, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table'
 import { useRouter } from 'next/navigation'
 import { ReactNode } from 'react'
-import { ChevronRight, ClipboardCopy } from 'lucide-react'
-import { toast } from 'sonner'
+import { ChevronRight } from 'lucide-react'
 
 export type Form = {
   id: string
   name: string
   formId: string
   status: 'active' | 'pending'
+  spamFilterEnabled: boolean
+  recipientCount: number
 }
 
-interface DataTableProps<TData extends { id: string }, TValue> {
-  columns: ColumnDef<TData, TValue>[]
-  data: TData[]
+const columns: ColumnDef<Form>[] = [
+  {
+    accessorKey: 'name',
+    header: 'Name',
+  },
+  {
+    accessorKey: 'recipientCount',
+    header: 'Recipients',
+    cell: ({ row }) => {
+      const count = row.original.recipientCount
+      return <span className="text-muted-foreground">{count}</span>
+    },
+  },
+  {
+    accessorKey: 'spamFilterEnabled',
+    header: 'Spam Filter',
+    cell: ({ row }) => {
+      const enabled = row.original.spamFilterEnabled
+      return (
+        <Badge variant={enabled ? 'default' : 'secondary'} className={enabled ? 'bg-blue-500' : ''}>
+          {enabled ? 'On' : 'Off'}
+        </Badge>
+      )
+    },
+  },
+]
+
+interface DataTableProps {
+  data: Form[]
 }
 
-export default function TableGridForms<TData extends { id: string }, TValue>({
-  columns,
-  data,
-}: DataTableProps<TData, TValue>) {
+export default function TableGridForms({ data }: DataTableProps) {
   const router = useRouter()
   const table = useReactTable({
     data,
@@ -80,22 +105,7 @@ export default function TableGridForms<TData extends { id: string }, TValue>({
                         />
                       </div>
                     ) : (
-                      <div
-                        className="flex items-center gap-2 w-fit"
-                        onClick={(e) => {
-                          e.stopPropagation()
-
-                          // Copy to clipboard
-                          navigator.clipboard.writeText(cell.getValue() as string)
-                          toast.success('Copied to clipboard')
-                        }}
-                      >
-                        {cell.getValue() as ReactNode}
-                        <ClipboardCopy
-                          size={23}
-                          className="duration-150 p-1 rounded-sm hover:bg-gray-200"
-                        />
-                      </div>
+                      flexRender(cell.column.columnDef.cell, cell.getContext())
                     )}
                   </TableCell>
                 ))}
