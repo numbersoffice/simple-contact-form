@@ -18,6 +18,9 @@ export default function SettingsForm({ teamId, openaiKey }: SettingsFormProps) {
   const [loading, setLoading] = useState(false)
   const [showKey, setShowKey] = useState(false)
 
+  // Detect the provider from the key so the user knows which service will be used.
+  const provider = key.startsWith('sk-ant-') ? 'Anthropic (Claude)' : key ? 'OpenAI' : null
+
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
     setLoading(true)
@@ -25,7 +28,7 @@ export default function SettingsForm({ teamId, openaiKey }: SettingsFormProps) {
     try {
       // Verify the API key first if it's not empty
       if (key) {
-        const verifyRes = await fetch('/api/verify-openai-key', {
+        const verifyRes = await fetch('/api/verify-llm-key', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -67,9 +70,11 @@ export default function SettingsForm({ teamId, openaiKey }: SettingsFormProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>OpenAI API Key</CardTitle>
+        <CardTitle>Spam Filter API Key</CardTitle>
         <CardDescription>
-          Add your OpenAI API key to enable spam filtering.
+          Add an LLM API key to enable spam filtering. Use an OpenAI key, or an Anthropic key
+          (starting with <code className="text-xs">sk-ant-</code>) to filter with Claude. The
+          provider is detected automatically from the key.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -93,6 +98,11 @@ export default function SettingsForm({ teamId, openaiKey }: SettingsFormProps) {
                 {showKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
             </div>
+            {provider && (
+              <p className="text-xs text-muted-foreground">
+                Detected provider: <span className="font-medium">{provider}</span>
+              </p>
+            )}
           </div>
           <Button type="submit" disabled={loading}>
             {loading ? 'Saving...' : 'Save'}
