@@ -90,8 +90,10 @@ export function getAgentSteps(baseUrl: string): AgentStep[] {
     {
       title: 'Add a recipient',
       body:
-        'Recipients are the inboxes that form submissions are forwarded to. A confirmation email (double opt-in) is sent to ' +
-        'the address; if it matches your own account email it is confirmed automatically.',
+        'Recipients are the inboxes that form submissions are forwarded to. Your account email is already verified from ' +
+        'sign-up, so adding it as a recipient confirms it automatically — it does not need to be verified again. Every ' +
+        'other email address must be verified individually: a double opt-in confirmation email is sent to it, and the ' +
+        'owner must click the link to confirm before it is active.',
       snippets: [
         {
           language: 'bash',
