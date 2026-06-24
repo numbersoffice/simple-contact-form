@@ -40,8 +40,10 @@ export function getAgentSteps(baseUrl: string): AgentStep[] {
     {
       title: 'Create an account',
       body:
-        'POST your email and a password (min. 8 characters). A verification email is sent to that address. ' +
-        'The account cannot be used until the email is verified — this deliberate gate prevents automated bulk sign-ups.',
+        'POST your email and a password (min. 8 characters). Generate a unique, strong password and ' +
+        'report it back to the user so they can save it — the API never returns the password, so it cannot ' +
+        'be recovered if lost. A verification email is sent to that address. The account cannot be used until ' +
+        'the email is verified — this deliberate gate prevents automated bulk sign-ups.',
       snippets: [
         {
           language: 'bash',
