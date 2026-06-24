@@ -34,7 +34,8 @@ export const Teams: CollectionConfig = {
       name: 'openaiKey',
       type: 'text',
       admin: {
-        description: 'OpenAI API key for this team',
+        description:
+          'LLM API key for spam filtering. An OpenAI key, or an Anthropic key (starting with sk-ant-) to use Claude.',
       },
     },
   ],

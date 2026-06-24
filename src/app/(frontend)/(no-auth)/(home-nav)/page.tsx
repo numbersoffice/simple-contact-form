@@ -5,10 +5,12 @@ import '../../styles.css'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import Code from '@/components/code'
 import { htmlForm, reactForm, goForm } from '@/data/form-code'
+import { getAgentSteps } from '@/data/agent-guide'
 import Image from 'next/image'
 import Navbar from '@/components/navbar'
 
-const demoSubmissionUrl = `${process.env.NEXT_PUBLIC_HOST_URL}/submit/YOUR_FORM_ID`
+const baseUrl = process.env.NEXT_PUBLIC_HOST_URL || 'https://simplecontactform.org'
+const demoSubmissionUrl = `${baseUrl}/submit/YOUR_FORM_ID`
 
 export default async function HomePage() {
   if (process.env.SHOW_LANDING_PAGE !== 'true') {
@@ -86,6 +88,44 @@ export default async function HomePage() {
           </p>
         </div>
       </section>
+
+      <AgentSection />
     </div>
+  )
+}
+
+async function AgentSection() {
+  const steps = getAgentSteps(baseUrl)
+
+  return (
+    <section className="flex flex-col items-center pb-24 md:pb-48 px-6">
+      <div className="w-full max-w-[800px] flex flex-col gap-3 mb-8">
+        <h2 className="text-2xl font-semibold">For AI agents</h2>
+        <p className="text-gray-600 text-base">
+          Agents can use the entire platform over the HTTP API — create an account, build forms, and
+          reuse the generated form ID without leaving the terminal. A machine-readable version of
+          this guide lives at{' '}
+          <a href="/llms.txt" className="underline underline-offset-4">
+            /llms.txt
+          </a>
+          . Email verification is required to create an account, which keeps automated sign-ups from
+          abusing the service.
+        </p>
+      </div>
+
+      <ol className="w-full max-w-[800px] flex flex-col gap-8">
+        {steps.map((step, i) => (
+          <li key={i} className="flex flex-col gap-3">
+            <h3 className="font-semibold">
+              {i + 1}. {step.title}
+            </h3>
+            <p className="text-gray-600 text-sm">{step.body}</p>
+            {step.snippets?.map((snippet, j) => (
+              <Code key={j} code={snippet.code} language={snippet.language} />
+            ))}
+          </li>
+        ))}
+      </ol>
+    </section>
   )
 }
