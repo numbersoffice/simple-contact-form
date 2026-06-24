@@ -3,7 +3,8 @@
 This project provides an interface to host and manage contact form forwarders. It is based on Nextjs and uses Payload CMS as the application framework. The main features are:
  - Team creation and role based user management
  - Double opt-in forwarding-address verification
- - OpenAI integration for spam filtering of form submissions
+ - OpenAI or Anthropic (Claude) integration for spam filtering of form submissions
+ - Agent-friendly: the whole flow (sign up, create forms, send submissions) is documented for AI agents on the home page and as a machine-readable `/llms.txt`
 
 
 ## Getting Started

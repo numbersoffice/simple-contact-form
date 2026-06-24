@@ -146,7 +146,7 @@ export default function SpamFilterEditor({
       {/* Unavailability message */}
       {!hasOpenAIKey && (
         <div className="text-sm p-4 py-2 bg-amber-400 w-full">
-          Add an OpenAI API key in team settings to enable the spam filter.
+          Add an OpenAI or Anthropic API key in team settings to enable the spam filter.
         </div>
       )}
     </Card>
