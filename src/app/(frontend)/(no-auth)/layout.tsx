@@ -13,6 +13,9 @@ export default async function Layout({ children }: { children: React.ReactNode }
           <Link className="text-sm text-center text-gray-500 hover:underline" href="/privacy">
             Privacy Policy
           </Link>
+          <a className="text-sm text-center text-gray-500 hover:underline" href="/llms.txt">
+            For AI agents
+          </a>
         </div>
 
         <p className="text-sm text-gray-500 block text-center">
