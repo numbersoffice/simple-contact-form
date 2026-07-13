@@ -37,17 +37,27 @@ export default async function HomePage() {
         <p className="text-xl text-gray-600 max-w-[550px] mx-auto text-center">
           Spam protected form submissions directly to your email inbox. No backend setup required.
         </p>
-        <div className="flex flex-col sm:flex-row gap-4 mt-4 max-w-[600px]">
-          <div className="flex-1 border rounded-lg p-4 bg-background">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4 max-w-[600px]">
+          <div className="border rounded-lg p-4 bg-background">
             <h3 className="font-semibold mb-1">Free to use</h3>
             <p className="text-sm text-gray-600">
               For personal use or small to medium sized businesses.
             </p>
           </div>
-          <div className="flex-1 border rounded-lg p-4 bg-background">
+          <div className="border rounded-lg p-4 bg-background">
             <h3 className="font-semibold mb-1">Self-hostable</h3>
             <p className="text-sm text-gray-600">
               Run your own instance for full control or higher volume.
+            </p>
+          </div>
+          <div className="border rounded-lg p-4 bg-background sm:col-span-2">
+            <h3 className="font-semibold mb-1">Building with an AI agent?</h3>
+            <p className="text-sm text-gray-600">
+              Agents can run the whole platform over the HTTP API. Full guide at{' '}
+              <a href="/llms.txt" className="underline underline-offset-4">
+                /llms.txt
+              </a>
+              .
             </p>
           </div>
         </div>
@@ -84,20 +94,6 @@ export default async function HomePage() {
             configured recipients. Replace{' '}
             <code className="bg-gray-100 px-1 rounded text-sm">YOUR_FORM_ID</code> with your actual
             form ID.
-          </p>
-        </div>
-      </section>
-
-      <section className="flex flex-col items-center pb-24 md:pb-48 px-6">
-        <div className="w-full max-w-[800px] border rounded-lg p-6 bg-background flex flex-col gap-3">
-          <h2 className="text-xl font-semibold">Building with an AI agent?</h2>
-          <p className="text-gray-600 text-sm">
-            Agents can run the whole platform over the HTTP API — create an account, build forms, and
-            reuse the generated form ID. The full step-by-step guide lives at{' '}
-            <a href="/llms.txt" className="underline underline-offset-4">
-              /llms.txt
-            </a>
-            .
           </p>
         </div>
       </section>
