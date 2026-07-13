@@ -28,6 +28,7 @@ const PLACEHOLDER = {
   token: 'YOUR_TOKEN',
   team: 'TEAM_ID',
   recipient: 'RECIPIENT_ID',
+  doc: 'DOCUMENT_ID',
   form: 'FORM_ID',
 }
 
@@ -111,7 +112,9 @@ export function getAgentSteps(baseUrl: string): AgentStep[] {
       title: 'Create a form and read back its form ID',
       body:
         'Forms accept arbitrary fields, so the same endpoint creates contact forms, feedback forms, waitlists, surveys — any form. ' +
-        'A unique `formId` is generated for you; copy it straight into whatever you are building.',
+        'The response returns two different identifiers: the Payload document `id` and a separate `formId` field. ' +
+        'The Form ID you submit to and drop into whatever you are building is the `formId` field — **not** the document `id`. ' +
+        'Copy the value of `formId` straight into your form.',
       snippets: [
         {
           language: 'bash',
@@ -119,7 +122,8 @@ export function getAgentSteps(baseUrl: string): AgentStep[] {
   -H 'Authorization: JWT ${PLACEHOLDER.token}' \\
   -H 'Content-Type: application/json' \\
   -d '{"name":"Contact form","team":"${PLACEHOLDER.team}","recipients":["${PLACEHOLDER.recipient}"]}'
-# -> { "doc": { "formId": "${PLACEHOLDER.form}", ... } }`,
+# -> { "doc": { "id": "${PLACEHOLDER.doc}", "formId": "${PLACEHOLDER.form}", ... } }
+# Use "formId" (the Form ID) — NOT the document "id".`,
         },
       ],
     },
@@ -150,7 +154,11 @@ curl -X PATCH ${baseUrl}/api/forms/${PLACEHOLDER.form} \\
       title: 'Send submissions to the form',
       body:
         'Anyone can POST submissions to the form endpoint — no auth required. Fields are arbitrary and emailed to every ' +
-        'recipient. Add `?format=json` for a JSON response instead of a redirect, or drop the HTML form straight into a page.',
+        'recipient. By default a successful submission returns a 303 redirect to a success page with a "Return to site" ' +
+        'link that sends the user back to the page the form was submitted from. That return page is taken from the ' +
+        "request's `Origin` header, so make sure a proper `Origin` header is sent (browsers add it automatically for real " +
+        'HTML forms) — otherwise the return link will be broken. Add `?format=json` to skip the redirect and get a JSON ' +
+        'response instead, or drop the HTML form straight into a page.',
       snippets: [
         {
           language: 'bash',
@@ -197,6 +205,8 @@ export function buildAgentGuideMarkdown(baseUrl: string): string {
 - Email verification is mandatory and cannot be skipped — it keeps automated sign-ups from abusing the service.
 - Forms accept arbitrary fields, so this works for contact forms or any other kind of form.
 - The REST API is provided by Payload CMS; create/update/find use \`POST\`/\`PATCH\`/\`GET\` on \`/api/<collection>\`.
+- The Form ID you submit to is the \`formId\` field on a form — not the Payload document \`id\`. Read \`doc.formId\` from the create-form response.
+- A default (non-JSON) submission returns a 303 redirect to a success page whose "Return to site" link is derived from the request's \`Origin\` header, so send a proper \`Origin\` header (or use \`?format=json\` to skip the redirect) — otherwise the return link will be broken.
 
 ## Create and use a form (end to end)
 
