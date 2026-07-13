@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { ArrowLeft } from 'lucide-react'
 
 export default async function SubmitSuccess({
   searchParams,
@@ -15,9 +16,7 @@ export default async function SubmitSuccess({
           <h1 className="text-2xl font-semibold">Success</h1>
           <p>We have received your submission.</p>
           <a href={returnUrl} className="text-blue-500 group inline-flex items-center w-fit">
-            <span className="transform transition-transform duration-300 group-hover:-translate-x-1">
-              {'<-'}
-            </span>
+            <ArrowLeft className="h-4 w-4 transform transition-transform duration-300 group-hover:-translate-x-1" />
             <span className="ml-1">Return to site</span>
           </a>
         </div>

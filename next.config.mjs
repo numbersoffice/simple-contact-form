@@ -6,6 +6,15 @@ import remarkGfm from 'remark-gfm'
 const nextConfig = {
   devIndicators: false,
   pageExtensions: ['js', 'jsx', 'md', 'mdx', 'ts', 'tsx'],
+  async redirects() {
+    return [
+      {
+        source: '/docs',
+        destination: '/llms.txt',
+        permanent: false,
+      },
+    ]
+  },
 }
 
 const withMDX = createMDX({
