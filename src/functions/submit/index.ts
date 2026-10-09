@@ -52,18 +52,24 @@ export async function handleFormSubmission(
       )
     }
     fields = fields.map((f) => ({
-      ...f,
       value:
         String(f.value).slice(0, MAX_FIELD_LEN) +
         (f.value.length > MAX_FIELD_LEN ? ' [max length reached]' : ''),
       name: String(f.name).slice(0, 200),
     }))
 
-    // Set Return URL
-    const host = request.headers.get('host')
-    const protocol = request.headers.get('x-forwarded-proto') || 'http'
-    const origin = request.headers.get('origin')
-    const returnUrl = `${protocol}://${host}/submit-success?return_url=${origin}`
+    // Set Return URL (check if custom redirect exists)
+    const customRedirect = fields.find((f) => f.name === "redirect")
+    let returnUrl = ""
+    if (customRedirect && customRedirect.value !== "") {
+      returnUrl = customRedirect.value
+    } else {
+      const host = request.headers.get('host')
+      const protocol = request.headers.get('x-forwarded-proto') || 'http'
+      const origin = request.headers.get('origin')
+      returnUrl = `${protocol}://${host}/submit-success?return_url=${origin}`
+    }
+
 
     // Honeypot
     // Check if any honeypot fields have been filled in
@@ -79,7 +85,7 @@ export async function handleFormSubmission(
       )
 
     // Remove utility fields
-    fields = fields.filter((f) => !HONEYPOTS.includes(f.name))
+    fields = fields.filter((f) => !HONEYPOTS.includes(f.name) && f.name !== "redirect")
 
     ////////////////////////////
     // ALL CONTENT CHECKS PASSED
