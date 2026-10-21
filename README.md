@@ -27,6 +27,25 @@ Create an **.env** file in the project root with the following keys:
 - `SMTP_PASS` SMTP password
 
 
+## Local test database
+
+Docker Compose runs only MongoDB for local development and testing:
+
+```bash
+docker compose -f docker/compose.yaml up -d --wait
+```
+
+Use the `DATABASE_URI` from `.env.example`. MongoDB listens on `127.0.0.1:27018`
+and initializes a single-node replica set so Payload transactions work. This
+local-only database has no authentication and stores data in a named volume.
+
+```bash
+docker compose -f docker/compose.yaml down
+```
+
+Add `--volumes` to the shutdown command to delete the test database. Run the
+application locally using npm; the Compose setup does not deploy the app.
+
 ## Development
 
 This project is under **active development**. Features and APIs will change frequently.
