@@ -1,6 +1,6 @@
 import type { CollectionConfig, PayloadRequest } from 'payload'
-import { VerifiationTokenField } from './custom-fields/verification-token'
-import { associatesOnly, createForAssociates, updateForAssociates } from './utils/access'
+import { VerifiationTokenField, generateVerificationToken } from './custom-fields/verification-token'
+import { adminsOnly, associatesOnly, createForAssociates, updateForAssociates } from './utils/access'
 
 export const Recipients: CollectionConfig = {
   slug: 'recipients',
@@ -18,6 +18,8 @@ export const Recipients: CollectionConfig = {
       name: 'verified',
       type: 'checkbox',
       required: true,
+      defaultValue: false,
+      access: { create: adminsOnly, update: adminsOnly },
     },
     {
       name: 'team',
@@ -46,7 +48,6 @@ export const Recipients: CollectionConfig = {
       // Check for admins
       if (req.user?.collection === 'users') return true
 
-      // Chec for authorization
       // Prevent users from setting the verified field to true
       // Local api is exempt from this check since it skips access checks
       if (data?.verified) return false
@@ -56,23 +57,34 @@ export const Recipients: CollectionConfig = {
     delete: associatesOnly,
   },
   hooks: {
-    afterOperation: [
+    beforeChange: [
+      ({ operation, originalDoc, data }) => {
+        if (operation === 'update' && data.email !== undefined && data.email !== originalDoc.email) {
+          data.verified = false
+          data.verificationToken = generateVerificationToken()
+        }
+        return data
+      },
+    ],
+    afterChange: [
       // Send an email to verify the recipient
-      async ({ operation, req, result }) => {
-        if (operation === 'create') {
+      async ({ operation, req, doc, previousDoc }) => {
+        if (operation === 'create' || doc.email !== previousDoc?.email) {
           const { payload, user } = req
-          const email = result.email
-          const docId = result.id
+          const email = doc.email
+          const docId = doc.id
           const { verificationToken } = await req.payload.findByID({
             collection: 'recipients',
             id: docId,
+            req,
           })
 
           // Skip if user is trying to add their own email
-          if (user?.email === email) {
+          if (user?.collection === 'app-users' && user._verified && user.email === email) {
             // Set the recipient to verified
             await payload.update({
               collection: 'recipients',
+              req,
               data: {
                 verified: true,
               },
@@ -88,6 +100,7 @@ export const Recipients: CollectionConfig = {
             // Set the recipient to verified
             await payload.update({
               collection: 'recipients',
+              req,
               data: {
                 verified: true,
               },
@@ -182,9 +195,14 @@ export const Recipients: CollectionConfig = {
             collection: 'recipients',
             data: {
               verified: true,
+              verificationToken: null,
             },
             where: {
-              id: { equals: docId },
+              and: [
+                { id: { equals: docId } },
+                { verificationToken: { equals: token } },
+                { email: { equals: recipient.email } },
+              ],
             },
           })
 

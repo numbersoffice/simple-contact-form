@@ -157,7 +157,7 @@ export async function handleFormSubmission(
     try {
       recipients.forEach((r: Recipient | string) => {
         // Skip malformed recipients
-        if (typeof r === 'string') return
+        if (typeof r === 'string' || !r?.verified) return
 
         payload.sendEmail({
           to: r.email,

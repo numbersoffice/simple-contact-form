@@ -1,4 +1,8 @@
-import { Field } from 'payload'
+import type { Field } from 'payload'
+import { randomBytes } from 'node:crypto'
+import { adminsOnly } from '../utils/access'
+
+export const generateVerificationToken = () => randomBytes(32).toString('hex')
 
 /**
  * This field adds a verificaitonToken field to the collection.
@@ -8,6 +12,11 @@ import { Field } from 'payload'
 export const VerifiationTokenField: Field = {
   name: 'verificationToken',
   type: 'text',
+  access: {
+    create: adminsOnly,
+    read: adminsOnly,
+    update: adminsOnly,
+  },
   admin: {
     readOnly: true,
   },
@@ -16,27 +25,9 @@ export const VerifiationTokenField: Field = {
       // Generate a verification token before creating the document
       ({ value, operation }) => {
         if (operation === 'create') {
-          // Generate a random token
-          const token =
-            Math.random().toString(36).substring(2, 15) +
-            Math.random().toString(36).substring(2, 15)
-          return token
+          return generateVerificationToken()
         }
         return value
-      },
-    ],
-    afterRead: [
-      // Hide token from app users
-      ({ value, req }) => {
-        // Expose token to local API
-        // Access controll is already handled in access settings
-        if (!req.user) return value
-
-        // Expose token to admins
-        if (req.user?.collection === 'users') return value
-
-        // Hide token from app users
-        if (req.user && req.user?.collection === 'app-users') return null
       },
     ],
   },

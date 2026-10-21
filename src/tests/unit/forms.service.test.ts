@@ -17,7 +17,6 @@ const baseDeps = () => ({
     find: vi.fn(),
     sendEmail: vi.fn(),
   },
-  consumeBalance: vi.fn(),
   checkforSpam: vi.fn(),
   utils: {
     checkQueryParams: (p: Record<string, unknown>, req: string[]) => ({ success: !!p.form_id }),
@@ -58,6 +57,9 @@ describe('handleFormSubmission', () => {
   it('spam returns generic success without sending', async () => {
     const deps = baseDeps()
     deps.checkforSpam.mockResolvedValue(true)
+    deps.payload.find.mockResolvedValue({
+      docs: [{ team: { id: 't1', openaiKey: 'test-key' }, spamFilterEnabled: true, spamFilterPrompt: 'Detect spam' }],
+    })
     const req = makeReq({ name: 'x' })
     const res = await handleFormSubmission(req, { form_id: 'abc' }, deps as any)
     expect(res.status).toBe(200)
@@ -73,17 +75,19 @@ describe('handleFormSubmission', () => {
     expect(res.status).toBe(400)
   })
 
-  it('success path charges and sends emails', async () => {
+  it('success path sends only to verified recipients', async () => {
     const deps = baseDeps()
     deps.checkforSpam.mockResolvedValue(false)
     deps.payload.find.mockResolvedValue({
-      docs: [{ name: 'My Form', recipients: [{ email: 'to@example.com' }], team: { id: 't1' } }],
+      docs: [{ name: 'My Form', recipients: [
+        { email: 'to@example.com', verified: true },
+        { email: 'unverified@example.com', verified: false },
+      ], team: { id: 't1' } }],
     })
-    deps.consumeBalance.mockResolvedValue({})
     const req = makeReq({ name: 'John', message: 'Hi' })
     const res = await handleFormSubmission(req, { form_id: 'abc' }, deps as any)
     expect(res.status).toBe(200)
-    expect(deps.consumeBalance).toHaveBeenCalledWith({ team: { id: 't1' }, charge: 1 })
     expect(deps.payload.sendEmail).toHaveBeenCalledTimes(1)
+    expect(deps.payload.sendEmail).toHaveBeenCalledWith(expect.objectContaining({ to: 'to@example.com' }))
   })
 })
