@@ -99,7 +99,7 @@ export const Teams: CollectionConfig = {
       method: 'delete',
       handler: async (req: PayloadRequest) => {
         // Check if user is authenticated
-        if (!req.user) {
+        if (req.user?.collection !== 'app-users') {
           return Response.json({ message: 'Unauthorized' }, { status: 401 })
         }
 
@@ -117,56 +117,39 @@ export const Teams: CollectionConfig = {
         const teamRes = await req.payload.findByID({
           collection: 'teams',
           id: teamId,
+          depth: 0,
+          disableErrors: true,
         })
 
         if (!teamRes) {
           return Response.json({ message: 'Team not found' }, { status: 404 })
         }
 
-        // Get user to be removed
-        // Check if user exists
-        const userToBeDeletedRes = await req.payload.findByID({
-          collection: 'app-users',
-          id: memberId,
-        })
-
-        if (!userToBeDeletedRes || typeof userToBeDeletedRes !== 'object') {
-          console.log('User not found')
-          return Response.json({ message: 'User not found' }, { status: 404 })
-        }
-
         // Check if initiating user is member or owner
         const initiatingUser = req.user
-        const initiatingUserIsMember = teamRes.members?.some((member) => {
-          if (typeof member !== 'object') return false
-          return member.id === initiatingUser.id
-        })
-        const initiatingUserIsOwner = teamRes.owners?.some((owner) => {
-          if (typeof owner !== 'object') return false
-          return owner.id === initiatingUser.id
-        })
+        const members = (teamRes.members || []).map((member) => typeof member === 'string' ? member : member.id)
+        const owners = (teamRes.owners || []).map((owner) => typeof owner === 'string' ? owner : owner.id)
+        const initiatingUserIsMember = members.includes(initiatingUser.id)
+        const initiatingUserIsOwner = owners.includes(initiatingUser.id)
 
         // Check if user to be removed is member
-        const userToBeRemovedIsOwner = teamRes.owners?.some((owner) => {
-          if (typeof owner !== 'object') return false
-          return owner.id === userToBeDeletedRes.id
-        })
+        const userToBeRemovedIsOwner = owners.includes(memberId)
 
         // Check user permission to remove member
         // User is not part of the team
-        if (!initiatingUserIsMember && !isOwner) {
+        if (!initiatingUserIsMember && !initiatingUserIsOwner) {
           console.log('User is not a member or owner')
           return Response.json({ message: 'Unauthorized' }, { status: 401 })
         }
 
         // User is last owner
-        if (initiatingUserIsOwner && teamRes.owners?.length === 1 && userToBeRemovedIsOwner) {
+        if (owners.length === 1 && userToBeRemovedIsOwner) {
           console.log('User is last owner')
           return Response.json({ message: 'You cannot remove the last owner' }, { status: 401 })
         }
 
         // User is member and not trying to remove themselves
-        if (initiatingUserIsMember && initiatingUser.id !== memberId) {
+        if (!initiatingUserIsOwner && initiatingUser.id !== memberId) {
           console.log('User is a member trying to remove themselves')
           return Response.json({ message: 'Unauthorized' }, { status: 401 })
         }
@@ -174,27 +157,22 @@ export const Teams: CollectionConfig = {
         // User is allowed to remove member
         // Construct new data with filtered members and owners
         const data = {
-          ...teamRes,
-          members: teamRes.members?.filter((member) => {
-            if (typeof member !== 'object') return false
-            return member.id !== memberId
-          }),
-          owners: teamRes.owners?.filter((owner) => {
-            if (typeof owner !== 'object') return false
-            return owner.id !== memberId
-          }),
+          members: members.filter((id) => id !== memberId),
+          owners: owners.filter((id) => id !== memberId),
         }
 
         // Update team
         const teamUpdateRes = await req.payload.update({
           collection: 'teams',
-          id: teamId,
+          where: {
+            and: [{ id: { equals: teamId } }, { updatedAt: { equals: teamRes.updatedAt } }],
+          },
           data,
         })
 
         // Check for update success
-        if (!teamUpdateRes) {
-          return Response.json({ message: 'Team not found' }, { status: 404 })
+        if (!teamUpdateRes.docs.length) {
+          return Response.json({ message: 'Team changed. Please retry.' }, { status: 409 })
         }
 
         return Response.json({ message: 'Member removed' }, { status: 200 })
