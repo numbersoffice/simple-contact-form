@@ -1,6 +1,6 @@
 import type { CollectionConfig, PayloadRequest } from 'payload'
 import { VerifiationTokenField } from './custom-fields/verification-token'
-import { associatesOnly } from './utils/access'
+import { associatesOnly, createForAssociates, updateForAssociates } from './utils/access'
 
 export const Recipients: CollectionConfig = {
   slug: 'recipients',
@@ -28,12 +28,12 @@ export const Recipients: CollectionConfig = {
     VerifiationTokenField,
   ],
   access: {
-    create: ({ req, data }) => {
+    create: async ({ req, data }) => {
       // Check for admins
       if (req.user?.collection === 'users') return true
 
       // Check for authorization
-      if (!associatesOnly({ req })) return false
+      if (!(await createForAssociates({ req, data }))) return false
 
       // Prevent users from setting the verified field to true
       // Local api is exempt from this check since it skips access checks
@@ -42,18 +42,16 @@ export const Recipients: CollectionConfig = {
       return true
     },
     read: associatesOnly,
-    update: ({ req, data }) => {
+    update: async ({ req, data }) => {
       // Check for admins
       if (req.user?.collection === 'users') return true
 
       // Chec for authorization
-      if (!associatesOnly({ req })) return false
-
       // Prevent users from setting the verified field to true
       // Local api is exempt from this check since it skips access checks
       if (data?.verified) return false
 
-      return true
+      return updateForAssociates({ req, data })
     },
     delete: associatesOnly,
   },

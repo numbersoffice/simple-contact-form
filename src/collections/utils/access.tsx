@@ -1,4 +1,32 @@
-import { PayloadRequest, Where } from 'payload'
+import type { Access, PayloadRequest, Where } from 'payload'
+
+// A create operation needs a boolean: a query constraint is not evaluated against input data.
+export const createForAssociates: Access = async ({ req, data }) => {
+  if (adminsOnly({ req })) return true
+  if (!req.user || typeof data?.team !== 'string') return false
+  return canAccessTeam(req, data.team)
+}
+
+export const updateForAssociates: Access = async ({ req, data }) => {
+  if (adminsOnly({ req })) return true
+  if (!req.user) return false
+  if (data?.team !== undefined) {
+    if (typeof data.team !== 'string' || !(await canAccessTeam(req, data.team))) return false
+  }
+  return associatesOnly({ req })
+}
+
+async function canAccessTeam(req: PayloadRequest, id: string) {
+  const team = await req.payload.findByID({
+    collection: 'teams',
+    id,
+    depth: 0,
+    overrideAccess: false,
+    disableErrors: true,
+    req,
+  })
+  return Boolean(team)
+}
 
 /**
  * Enforces the following access rules:
@@ -22,12 +50,12 @@ export function associatesOnly({ req }: { req: PayloadRequest }) {
     or: [
       {
         'team.members': {
-          contains: user,
+          contains: user.id,
         },
       },
       {
         'team.owners': {
-          contains: user,
+          contains: user.id,
         },
       },
     ],
@@ -54,7 +82,7 @@ export function ownersOnly({ req }: { req: PayloadRequest }) {
   // Only return true if the user is a member or owner of the team
   return {
     'team.owners': {
-      contains: user,
+      contains: user.id,
     },
   } as Where
 }
