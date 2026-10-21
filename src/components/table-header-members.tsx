@@ -14,8 +14,8 @@ import {
 import { Label } from './ui/label'
 import { Input } from './ui/input'
 import SubmitButton from './button-submit'
-import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState } from 'react'
+import { useParams, useRouter } from 'next/navigation'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select'
 import { toast } from 'sonner'
 
@@ -29,14 +29,8 @@ export default function RecipientTableHeader({
   const [loading, setLoading] = useState(false)
   const [dialogOpen, setDialogOpen] = useState(false)
   const router = useRouter()
-  const [teamId, setTeamId] = useState('')
+  const { team: teamId } = useParams<{ team: string }>()
   const _role = userRole.toLowerCase()
-
-  useEffect(() => {
-    const url = window.location.href
-    const team = url.split('/')[3]
-    setTeamId(team)
-  }, [])
 
   async function handleCreateForm(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()

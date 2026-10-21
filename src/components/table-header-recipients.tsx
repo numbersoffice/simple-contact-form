@@ -14,20 +14,14 @@ import {
 import { Label } from './ui/label'
 import { Input } from './ui/input'
 import SubmitButton from './button-submit'
-import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState } from 'react'
+import { useParams, useRouter } from 'next/navigation'
 
 export default function TableHeaderRecipients() {
   const [loading, setLoading] = useState(false)
   const [dialogOpen, setDialogOpen] = useState(false)
   const router = useRouter()
-  const [teamId, setTeamId] = useState('')
-
-  useEffect(() => {
-    const url = window.location.href
-    const team = url.split('/')[3]
-    setTeamId(team)
-  }, [])
+  const { team: teamId } = useParams<{ team: string }>()
 
   async function handleCreateForm(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
