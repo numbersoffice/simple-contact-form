@@ -24,7 +24,8 @@ export const AppUsers: CollectionConfig = {
   auth: {
     verify: {
       generateEmailHTML: ({ token, user }) => {
-        const verificationUrl = `${process.env.NEXT_PUBLIC_HOST_URL}/api/email-verification?token=${token}&email=${user.email}`
+        const query = new URLSearchParams({ token: token || '', email: user.email })
+        const verificationUrl = `${process.env.NEXT_PUBLIC_HOST_URL}/api/email-verification?${query}`
         return `Hey ${user.email}, verify your email by clicking here: ${verificationUrl}`
       },
     },
