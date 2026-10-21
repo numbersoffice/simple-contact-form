@@ -166,7 +166,7 @@ export const Invites: CollectionConfig = {
         const user = req.user
 
         if (!docId) return Response.json('No docId provided.', { status: 400 })
-        if (!user) return Response.json('No user provided.', { status: 400 })
+        if (user?.collection !== 'app-users') return Response.json('Application user required.', { status: 401 })
 
         // Get invite
         const inviteRes = await req.payload.findByID({

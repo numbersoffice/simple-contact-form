@@ -29,7 +29,7 @@ export async function POST(request: Request) {
     })
 
     // Return a 401 status code for unauthorized access
-    if (!result.token) return Response.json({ error: 'Invalid email or password' }, { status: 401 })
+    if (!result.token || !result.user) return Response.json({ error: 'Invalid email or password' }, { status: 401 })
 
     // If a token is returned, set the cookie with secure options
     cookieStore.set({

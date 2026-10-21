@@ -9,9 +9,10 @@ This project provides an interface to host and manage contact form forwarders. I
 
 ## Getting Started
 
-Clone the repository and install the dependencies:
+Use Node.js 22.12+ (22.x) or Node.js 24+, then clone the repository and install
+the locked dependencies:
 ```bash
-npm install
+npm ci
 ```
 
 ### 1. Environment Variables & Required Services
@@ -45,6 +46,17 @@ docker compose -f docker/compose.yaml down
 
 Add `--volumes` to the shutdown command to delete the test database. Run the
 application locally using npm; the Compose setup does not deploy the app.
+
+Run the tests with:
+
+```bash
+npm test
+npm run test:integration
+```
+
+Integration tests require the Compose database. They create a uniquely named
+test database on port 27018, stub email delivery, and delete only that database
+after running. They do not use the application's `DATABASE_URI`.
 
 ## Development
 

@@ -74,7 +74,7 @@ export interface Config {
     recipients: Recipient;
     forms: Form;
     invites: Invite;
-    'payload-locked-documents': PayloadLockedDocument;
+    'payload-kv': PayloadKv;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
@@ -94,23 +94,21 @@ export interface Config {
     recipients: RecipientsSelect<false> | RecipientsSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
     invites: InvitesSelect<false> | InvitesSelect<true>;
-    'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
+    'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
   };
   db: {
     defaultIDType: string;
   };
+  fallbackLocale: null;
   globals: {};
   globalsSelect: {};
   locale: null;
-  user:
-    | (User & {
-        collection: 'users';
-      })
-    | (AppUser & {
-        collection: 'app-users';
-      });
+  widgets: {
+    collections: CollectionsWidget;
+  };
+  user: User | AppUser;
   jobs: {
     tasks: unknown;
     workflows: unknown;
@@ -165,6 +163,7 @@ export interface User {
   resetPasswordExpiration?: string | null;
   salt?: string | null;
   hash?: string | null;
+  resetPasswordRequestedAt?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
   sessions?:
@@ -175,6 +174,7 @@ export interface User {
       }[]
     | null;
   password?: string | null;
+  collection: 'users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -200,6 +200,7 @@ export interface AppUser {
   resetPasswordExpiration?: string | null;
   salt?: string | null;
   hash?: string | null;
+  resetPasswordRequestedAt?: string | null;
   _verified?: boolean | null;
   _verificationToken?: string | null;
   loginAttempts?: number | null;
@@ -212,6 +213,7 @@ export interface AppUser {
       }[]
     | null;
   password?: string | null;
+  collection: 'app-users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -228,7 +230,7 @@ export interface Team {
     totalDocs?: number;
   };
   /**
-   * OpenAI API key for this team
+   * LLM API key for spam filtering. An OpenAI key, or an Anthropic key (starting with sk-ant-) to use Claude.
    */
   openaiKey?: string | null;
   updatedAt: string;
@@ -284,47 +286,20 @@ export interface Invite {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-locked-documents".
+ * via the `definition` "payload-kv".
  */
-export interface PayloadLockedDocument {
+export interface PayloadKv {
   id: string;
-  document?:
-    | ({
-        relationTo: 'users';
-        value: string | User;
-      } | null)
-    | ({
-        relationTo: 'app-users';
-        value: string | AppUser;
-      } | null)
-    | ({
-        relationTo: 'teams';
-        value: string | Team;
-      } | null)
-    | ({
-        relationTo: 'recipients';
-        value: string | Recipient;
-      } | null)
-    | ({
-        relationTo: 'forms';
-        value: string | Form;
-      } | null)
-    | ({
-        relationTo: 'invites';
-        value: string | Invite;
-      } | null);
-  globalSlug?: string | null;
-  user:
+  key: string;
+  data:
     | {
-        relationTo: 'users';
-        value: string | User;
+        [k: string]: unknown;
       }
-    | {
-        relationTo: 'app-users';
-        value: string | AppUser;
-      };
-  updatedAt: string;
-  createdAt: string;
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -377,6 +352,7 @@ export interface UsersSelect<T extends boolean = true> {
   resetPasswordExpiration?: T;
   salt?: T;
   hash?: T;
+  resetPasswordRequestedAt?: T;
   loginAttempts?: T;
   lockUntil?: T;
   sessions?:
@@ -402,6 +378,7 @@ export interface AppUsersSelect<T extends boolean = true> {
   resetPasswordExpiration?: T;
   salt?: T;
   hash?: T;
+  resetPasswordRequestedAt?: T;
   _verified?: T;
   _verificationToken?: T;
   loginAttempts?: T;
@@ -468,14 +445,11 @@ export interface InvitesSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-locked-documents_select".
+ * via the `definition` "payload-kv_select".
  */
-export interface PayloadLockedDocumentsSelect<T extends boolean = true> {
-  document?: T;
-  globalSlug?: T;
-  user?: T;
-  updatedAt?: T;
-  createdAt?: T;
+export interface PayloadKvSelect<T extends boolean = true> {
+  key?: T;
+  data?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -497,6 +471,16 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collections_widget".
+ */
+export interface CollectionsWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
