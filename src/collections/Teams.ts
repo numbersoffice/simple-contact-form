@@ -47,6 +47,7 @@ export const Teams: CollectionConfig = {
     create: ({ req: { user }, data }) => {
       // Allow admin access
       if (user?.collection === 'users') return true
+      if (user?.collection !== 'app-users') return false
 
       // Make sure users can not add owners arbitrarily
       if (data?.owners)
@@ -61,8 +62,11 @@ export const Teams: CollectionConfig = {
   hooks: {
     beforeChange: [
       //Automatically add creating user as owner
-      ({ req: { user }, data }) => {
-        if (user?.collection === 'app-users') {
+      ({ req: { user }, data, operation }) => {
+        if (operation === 'update' && data.owners !== undefined && !data.owners?.length) {
+          throw new Error('A team must have at least one owner.')
+        }
+        if (operation === 'create' && user?.collection === 'app-users') {
           return {
             ...data,
             owners: [user.id],
