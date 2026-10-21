@@ -82,6 +82,7 @@ export const Invites: CollectionConfig = {
       path: '/:id/resend',
       method: 'post',
       handler: async (req: PayloadRequest) => {
+        if (!req.user) return Response.json('Unauthorized.', { status: 401 })
         const docId = req.routeParams?.id
 
         if (!docId) return Response.json('No docId provided.', { status: 400 })
@@ -90,6 +91,7 @@ export const Invites: CollectionConfig = {
         const inviteRes = await req.payload.findByID({
           collection: 'invites',
           id: docId as string,
+          disableErrors: true,
         })
 
         if (!inviteRes) return Response.json('Invite not found.', { status: 404 })
@@ -99,6 +101,13 @@ export const Invites: CollectionConfig = {
 
         // Check if team is valid
         if (typeof team !== 'object') return Response.json('Invalid team.', { status: 400 })
+
+        const isOwner = req.user.collection === 'app-users' && team.owners?.some((owner) =>
+          (typeof owner === 'string' ? owner : owner.id) === req.user!.id,
+        )
+        if (req.user.collection !== 'users' && !isOwner) {
+          return Response.json('Only team owners can resend invitations.', { status: 403 })
+        }
 
         // Verification url
         const url =
