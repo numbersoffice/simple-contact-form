@@ -203,7 +203,7 @@ function isOwner({ req }: { req: PayloadRequest }) {
     or: [
       {
         owners: {
-          contains: user,
+          contains: user.id,
         },
       },
     ],
@@ -224,12 +224,12 @@ async function isOwnerOrMember({ req }: { req: PayloadRequest }) {
     or: [
       {
         members: {
-          contains: user,
+          contains: user.id,
         },
       },
       {
         owners: {
-          contains: user,
+          contains: user.id,
         },
       },
     ],

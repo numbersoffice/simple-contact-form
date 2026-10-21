@@ -263,7 +263,7 @@ function owner_query({ req }: { req: PayloadRequest }) {
 
   return {
     'team.owners': {
-      contains: user,
+      contains: user.id,
     },
   } as Where
 }
@@ -283,12 +283,12 @@ function ownerMemberInvitee_query({ req }: { req: PayloadRequest }) {
       },
       {
         'team.members': {
-          contains: user,
+          contains: user.id,
         },
       },
       {
         'team.owners': {
-          contains: user,
+          contains: user.id,
         },
       },
     ],
@@ -310,7 +310,7 @@ function ownerInvitee_query({ req }: { req: PayloadRequest }) {
       },
       {
         'team.owners': {
-          contains: user,
+          contains: user.id,
         },
       },
     ],
