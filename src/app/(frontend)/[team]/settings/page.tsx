@@ -13,7 +13,7 @@ export default async function SettingsPage({ params }: { params: Promise<{ team:
   const teamRes = await payload.findByID({
     collection: 'teams',
     id: awaitedParams.team,
-    context: { includeLLMKey: true },
+    showHiddenFields: true,
   })
 
   if (!teamRes) return notFound()

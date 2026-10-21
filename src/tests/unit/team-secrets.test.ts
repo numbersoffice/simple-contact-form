@@ -9,9 +9,7 @@ describe('team secrets', () => {
     expect(await field.access!.read!({} as never)).toBe(false)
   })
 
-  it('redacts secrets even in privileged local reads unless explicitly requested', async () => {
-    const hook = field.hooks!.afterRead![0]
-    expect(await hook({ value: 'secret', context: {} } as never)).toBeNull()
-    expect(await hook({ value: 'secret', context: { includeLLMKey: true } } as never)).toBe('secret')
+  it('hides secrets from default local reads', () => {
+    expect(field.hidden).toBe(true)
   })
 })

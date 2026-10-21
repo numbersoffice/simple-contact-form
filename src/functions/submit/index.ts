@@ -96,7 +96,7 @@ export async function handleFormSubmission(
     // Fetch form from database
     const formRes = await payload.find({
       collection: 'forms',
-      context: { includeLLMKey: true },
+      showHiddenFields: true,
       where: {
         formId: { equals: formId },
       },

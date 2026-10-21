@@ -46,7 +46,7 @@ export default async function FormPage({
     id: team.id,
     depth: 0,
     select: { openaiKey: true },
-    context: { includeLLMKey: true },
+    showHiddenFields: true,
   })
   const hasOpenAIKey = Boolean(keyStatus.openaiKey)
 
