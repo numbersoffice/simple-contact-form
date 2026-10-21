@@ -7,6 +7,7 @@ import Code from '@/components/code'
 import { htmlForm, reactForm, goForm } from '@/data/form-code'
 import Image from 'next/image'
 import Navbar from '@/components/navbar'
+import Script from 'next/script'
 
 const baseUrl = process.env.NEXT_PUBLIC_HOST_URL || 'https://simplecontactform.org'
 const demoSubmissionUrl = `${baseUrl}/submit/YOUR_FORM_ID`
@@ -18,6 +19,13 @@ export default async function HomePage() {
 
   return (
     <div>
+      {process.env.HOSTED && (
+        <Script
+          src="https://gc.zgo.at/count.js"
+          data-goatcounter="https://simplecontactform.goatcounter.com/count"
+          async
+        />
+      )}
       <Navbar withLogo={false} withAuthButtons />
       <section className="min-h-[85vh] flex flex-col items-center justify-center py-24 px-6 gap-6">
         <div className="relative flex flex-col items-center gap-8">
