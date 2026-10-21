@@ -1,8 +1,23 @@
-import type { CollectionConfig } from 'payload'
+import type { Access, CollectionConfig } from 'payload'
+import { adminsOnly } from './utils/access'
+
+const selfOrAdmin: Access = ({ req }) => {
+  if (adminsOnly({ req })) return true
+  if (req.user?.collection !== 'app-users') return false
+  return { id: { equals: req.user.id } }
+}
 
 export const AppUsers: CollectionConfig = {
   slug: 'app-users',
   lockDocuments: false,
+  access: {
+    admin: adminsOnly,
+    create: adminsOnly,
+    read: selfOrAdmin,
+    update: selfOrAdmin,
+    delete: adminsOnly,
+    unlock: adminsOnly,
+  },
   admin: {
     useAsTitle: 'email',
   },
