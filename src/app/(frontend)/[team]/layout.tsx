@@ -21,6 +21,7 @@ export default async function Layout(props: {
   // Get users teams
   const { docs } = await payload.find({
     collection: 'teams',
+    pagination: false,
     overrideAccess: false,
     disableErrors: true,
     user,
@@ -51,6 +52,7 @@ export default async function Layout(props: {
   // Get invites for user
   const invites = await payload.find({
     collection: 'invites',
+    pagination: false,
     where: {
       email: {
         equals: user.email,

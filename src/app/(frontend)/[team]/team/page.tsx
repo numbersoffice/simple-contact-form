@@ -23,6 +23,7 @@ export default async function MembersPage({ params }: { params: Promise<{ team: 
       overrideAccess: false,
       disableErrors: true,
       collection: 'invites',
+      pagination: false,
       user,
       where: {
         team: {

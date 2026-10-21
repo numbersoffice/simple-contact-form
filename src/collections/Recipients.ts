@@ -135,6 +135,7 @@ export const Recipients: CollectionConfig = {
         // Get all forms with this recipient
         const forms = await req.payload.find({
           collection: 'forms',
+          pagination: false,
           where: {
             recipients: {
               contains: id,

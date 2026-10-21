@@ -73,6 +73,7 @@ export default async function FormPage({
     payload.find({
       overrideAccess: false,
       collection: 'recipients',
+      pagination: false,
       user,
       where: {
         team: {

@@ -15,6 +15,7 @@ export default async function FormsPage({ params }: { params: Promise<{ team: st
     overrideAccess: false,
     disableErrors: true,
     collection: 'forms',
+    pagination: false,
     user,
     where: {
       team: {

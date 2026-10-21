@@ -41,6 +41,7 @@ export async function POST(request: Request) {
     // Get users teams
     const teams = await payload.find({
       collection: 'teams',
+      pagination: false,
       user: result.user,
       overrideAccess: false,
       disableErrors: true,
