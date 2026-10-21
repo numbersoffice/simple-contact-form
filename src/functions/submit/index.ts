@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server'
 import type { ServiceDeps } from './types'
 import type { Recipient } from '@/payload-types'
+import { PayloadTooLargeError, readLimitedFormData } from './read-form-data'
 
 export async function handleFormSubmission(
   request: NextRequest,
@@ -39,7 +40,7 @@ export async function handleFormSubmission(
 
     // Parse body as form data
     // Works for both html forms and programmatic requests
-    const formData = await request.formData()
+    const formData = await readLimitedFormData(request, MAX_BYTES)
     let fields = extractFormData(formData)
 
     // Basic abuse guards
@@ -172,6 +173,9 @@ export async function handleFormSubmission(
 
     return withCORS(successResponse(wantsJson, returnUrl, `Form submitted. TeamId: ${team.id}`))
   } catch (err) {
+    if (err instanceof PayloadTooLargeError) {
+      return withCORS(customResponse(413, { message: 'Payload too large.', success: false }))
+    }
     console.error('Unhandled form submission error:', err)
     return withCORS(
       customResponse(500, {

@@ -54,6 +54,15 @@ describe('handleFormSubmission', () => {
     await expect(res.json()).resolves.toBeDefined()
   })
 
+  it('rejects an oversized body without a Content-Length header before looking up a form', async () => {
+    const deps = baseDeps()
+    const req = makeReq({ message: 'x'.repeat(500_001) })
+    expect(req.headers.has('content-length')).toBe(false)
+    const res = await handleFormSubmission(req, { form_id: 'abc' }, deps as any)
+    expect(res.status).toBe(413)
+    expect(deps.payload.find).not.toHaveBeenCalled()
+  })
+
   it('spam returns generic success without sending', async () => {
     const deps = baseDeps()
     deps.checkforSpam.mockResolvedValue(true)
