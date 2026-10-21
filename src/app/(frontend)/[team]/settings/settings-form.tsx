@@ -10,30 +10,30 @@ import { Eye, EyeOff } from 'lucide-react'
 
 interface SettingsFormProps {
   teamId: string
-  openaiKey: string
+  hasKey: boolean
 }
 
-export default function SettingsForm({ teamId, openaiKey }: SettingsFormProps) {
-  const [key, setKey] = useState(openaiKey)
+export default function SettingsForm({ teamId, hasKey }: SettingsFormProps) {
+  const [key, setKey] = useState('')
+  const [configured, setConfigured] = useState(hasKey)
   const [loading, setLoading] = useState(false)
   const [showKey, setShowKey] = useState(false)
 
   // Detect the provider from the key so the user knows which service will be used.
   const provider = key.startsWith('sk-ant-') ? 'Anthropic (Claude)' : key ? 'OpenAI' : null
 
-  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault()
+  async function saveKey(value: string) {
     setLoading(true)
 
     try {
       // Verify the API key first if it's not empty
-      if (key) {
+      if (value) {
         const verifyRes = await fetch('/api/verify-llm-key', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ apiKey: key }),
+          body: JSON.stringify({ apiKey: value }),
         })
 
         const verifyData = await verifyRes.json()
@@ -50,10 +50,12 @@ export default function SettingsForm({ teamId, openaiKey }: SettingsFormProps) {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ openaiKey: key }),
+        body: JSON.stringify({ openaiKey: value }),
       })
 
       if (res.ok) {
+        setConfigured(Boolean(value))
+        setKey('')
         toast.success('Settings saved successfully')
       } else {
         const data = await res.json()
@@ -65,6 +67,11 @@ export default function SettingsForm({ teamId, openaiKey }: SettingsFormProps) {
     } finally {
       setLoading(false)
     }
+  }
+
+  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault()
+    if (key.trim()) await saveKey(key.trim())
   }
 
   return (
@@ -79,6 +86,9 @@ export default function SettingsForm({ teamId, openaiKey }: SettingsFormProps) {
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            {configured ? 'An API key is configured. Enter a new key to replace it.' : 'No API key is configured.'}
+          </p>
           <div className="space-y-2">
             <Label htmlFor="openai-key">API Key</Label>
             <div className="relative">
@@ -104,9 +114,14 @@ export default function SettingsForm({ teamId, openaiKey }: SettingsFormProps) {
               </p>
             )}
           </div>
-          <Button type="submit" disabled={loading}>
+          <Button type="submit" disabled={loading || !key.trim()}>
             {loading ? 'Saving...' : 'Save'}
           </Button>
+          {configured && (
+            <Button type="button" variant="outline" disabled={loading} onClick={() => saveKey('')}>
+              Remove key
+            </Button>
+          )}
         </form>
       </CardContent>
     </Card>

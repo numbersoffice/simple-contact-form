@@ -33,6 +33,10 @@ export const Teams: CollectionConfig = {
     {
       name: 'openaiKey',
       type: 'text',
+      access: { read: () => false },
+      hooks: {
+        afterRead: [({ value, context }) => context.includeLLMKey === true ? value : null],
+      },
       admin: {
         description:
           'LLM API key for spam filtering. An OpenAI key, or an Anthropic key (starting with sk-ant-) to use Claude.',

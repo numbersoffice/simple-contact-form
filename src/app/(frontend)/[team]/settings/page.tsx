@@ -13,6 +13,7 @@ export default async function SettingsPage({ params }: { params: Promise<{ team:
   const teamRes = await payload.findByID({
     collection: 'teams',
     id: awaitedParams.team,
+    context: { includeLLMKey: true },
   })
 
   if (!teamRes) return notFound()
@@ -33,7 +34,7 @@ export default async function SettingsPage({ params }: { params: Promise<{ team:
 
   return (
     <div className="space-y-6">
-      <SettingsForm teamId={awaitedParams.team} openaiKey={teamRes.openaiKey || ''} />
+      <SettingsForm teamId={awaitedParams.team} hasKey={Boolean(teamRes.openaiKey)} />
     </div>
   )
 }

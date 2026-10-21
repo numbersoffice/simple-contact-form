@@ -40,7 +40,15 @@ export default async function FormPage({
   const team = typeof teamRes.docs[0] === 'object' && teamRes.docs[0]
   if (!team) return redirect('/login')
   const owners = team.owners?.length ? team.owners : []
-  const hasOpenAIKey = !!team.openaiKey
+  // Membership was checked above. Only send key availability to the browser.
+  const keyStatus = await payload.findByID({
+    collection: 'teams',
+    id: team.id,
+    depth: 0,
+    select: { openaiKey: true },
+    context: { includeLLMKey: true },
+  })
+  const hasOpenAIKey = Boolean(keyStatus.openaiKey)
 
   // Check if the user is an owner of the team
   const isOwner = owners.some((owner) => {
